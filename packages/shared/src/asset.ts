@@ -1,17 +1,17 @@
-import { z } from "zod";
+import * as z from "zod/v4";
+import { tagSchema } from "./tag";
 
 export const assetTypeSchema = z.enum(["2d", "3d", "script"]);
-export const assetStatusSchema = z.enum(["draft", "review", "published"]);
 
 export const assetSchema = z.object({
-  id: z.string(),
+  id: z.uuid(),
   name: z.string().min(1),
+  description: z.string().nullable().meta({ description: "optionnal" }),
   type: assetTypeSchema,
-  status: assetStatusSchema,
-  priceEur: z.number().nullable(),
-  durationSec: z.number().int().positive(),
-  tags: z.array(z.string()),
-  createdAt: z.string(), // ISO
+  priceEur: z.number().positive().nullable(),
+  durationSec: z.number().int().positive().nullable(),
+  tags: z.array(tagSchema).min(1),
+  createdAt: z.iso.datetime(),
 });
 
 export const assetCreateSchema = assetSchema.omit({
@@ -21,8 +21,6 @@ export const assetCreateSchema = assetSchema.omit({
 
 export const assetUpdateSchema = assetCreateSchema.partial();
 
-export type AssetType = z.infer<typeof assetTypeSchema>;
-export type AssetStatus = z.infer<typeof assetStatusSchema>;
 export type Asset = z.infer<typeof assetSchema>;
 export type AssetCreateDTO = z.infer<typeof assetCreateSchema>;
 export type AssetUpdateDTO = z.infer<typeof assetUpdateSchema>;

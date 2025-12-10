@@ -9,7 +9,11 @@ function App() {
   useEffect(() => {
     fetchJson<Asset[]>("http://localhost:4000/assets")
       .then(setAssets)
-      .finally(() => setLoading(false));
+      .finally(() => { setLoading(false) })
+      .catch((error: Error) => {
+        console.error("Error fetching assets:", error);
+        setLoading(false);
+      });
   }, []);
 
   if (loading) return <div>Chargement…</div>;

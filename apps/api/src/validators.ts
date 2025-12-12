@@ -1,7 +1,7 @@
 import * as z from "zod/v4";
 import { AssetCreateDTO } from "@ts-drones/shared";
 import { Request, Response, NextFunction } from "express";
-import { assets } from "./db";
+import { assets } from "./services/db";
 
 // simple functions
 export function validateUniqueTags(toValidate: AssetCreateDTO): boolean {

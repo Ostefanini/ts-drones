@@ -19,7 +19,7 @@ export const document = createDocument({
             post: {
                 requestBody: {
                     content: {
-                        'application/json': {
+                        'multipart/form-data': {
                             schema: assetCreateSchema,
                         },
                     },
@@ -55,6 +55,23 @@ export const document = createDocument({
                     }
                 },
             },
+        },
+        '/assets/thumbnail/{id}': {
+            get: {
+                responses: {
+                    '200': {
+                        description: '200 OK',
+                        content: {
+                            'image/jpeg': {
+                                schema: z.instanceof(Buffer),
+                            },
+                        },
+                    },
+                    '404': {
+                        description: '404 Not Found',
+                    }
+                },
+            }
         },
         '/assets/{id}': {
             patch: {

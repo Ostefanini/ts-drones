@@ -5,22 +5,37 @@ export const assetTypeSchema = z.enum(["2d", "3d", "script"]);
 
 export const assetSchema = z.object({
   id: z.uuid(),
+  thumbnail: z.uuid(), // refers to the thumbnail asset id stored separately
   name: z.string().min(1),
   description: z.string().nullable().meta({ description: "optionnal" }),
   type: assetTypeSchema,
-  priceEur: z.number().positive().nullable(),
-  durationSec: z.number().int().positive().nullable(),
+  priceEur: z.number().nonnegative(),
+  durationSec: z.number().nonnegative().nullable(),
+  nbUav: z.number().nonnegative().nullable(),
   tags: z.array(tagSchema).min(1),
   createdAt: z.iso.datetime(),
 });
 
-export const assetCreateSchema = assetSchema.omit({
+// used only at runtime after multer upload, on req.body
+export const assetCreateTextFieldsSchema = assetSchema.omit({
   id: true,
   createdAt: true,
+  thumbnail: true,
 });
+
+// used when creating a new asset along with the thumbnail file
+export const assetCreateSchema = assetCreateTextFieldsSchema.extend({
+  thumbnail: z
+    .unknown()
+    .meta({
+      type: "string",
+      format: "binary",
+      description: "The asset thumbnail",
+    })
+})
 
 export const assetUpdateSchema = assetCreateSchema.partial();
 
 export type Asset = z.infer<typeof assetSchema>;
-export type AssetCreateDTO = z.infer<typeof assetCreateSchema>;
+export type AssetCreateDTO = z.infer<typeof assetCreateTextFieldsSchema>;
 export type AssetUpdateDTO = z.infer<typeof assetUpdateSchema>;

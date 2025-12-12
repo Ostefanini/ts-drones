@@ -4,7 +4,12 @@ import { tagsRouter } from "./tags";
 import { assetsRouter } from "./assets";
 
 const app = express();
-app.use(cors());
+app.use((_req, _res, next) => {
+    if (process.env.NODE_ENV === "development") {
+        return cors()
+    }
+    return next()
+});
 app.use(express.json());
 
 app.use((req, _res, next) => {

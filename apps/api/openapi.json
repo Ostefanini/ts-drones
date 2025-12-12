@@ -14,7 +14,7 @@
       "post": {
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "type": "object",
                 "properties": {
@@ -71,6 +71,11 @@
                       "type": "string",
                       "minLength": 1
                     }
+                  },
+                  "thumbnail": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "The asset thumbnail"
                   }
                 },
                 "required": [
@@ -79,7 +84,8 @@
                   "type",
                   "priceEur",
                   "durationSec",
-                  "tags"
+                  "tags",
+                  "thumbnail"
                 ]
               }
             }
@@ -94,6 +100,11 @@
                   "type": "object",
                   "properties": {
                     "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$"
+                    },
+                    "thumbnail": {
                       "type": "string",
                       "format": "uuid",
                       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$"
@@ -160,6 +171,7 @@
                   },
                   "required": [
                     "id",
+                    "thumbnail",
                     "name",
                     "description",
                     "type",
@@ -203,6 +215,11 @@
                     "type": "object",
                     "properties": {
                       "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$"
+                      },
+                      "thumbnail": {
                         "type": "string",
                         "format": "uuid",
                         "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$"
@@ -269,6 +286,7 @@
                     },
                     "required": [
                       "id",
+                      "thumbnail",
                       "name",
                       "description",
                       "type",
@@ -366,6 +384,11 @@
                       "format": "uuid",
                       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$"
                     },
+                    "thumbnail": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$"
+                    },
                     "name": {
                       "type": "string",
                       "minLength": 1
@@ -428,6 +451,7 @@
                   },
                   "required": [
                     "id",
+                    "thumbnail",
                     "name",
                     "description",
                     "type",

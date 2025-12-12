@@ -15,6 +15,7 @@
     "@tabler/icons-react": "^3.35.0",
     "@ts-drones/shared": "workspace:*",
     "axios": "^1.13.2",
+    "object-to-formdata": "^4.5.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

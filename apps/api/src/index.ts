@@ -13,7 +13,9 @@ app.use((_req, _res, next) => {
 app.use(express.json());
 
 app.use((req, _res, next) => {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    if (process.env.NODE_ENV === "development") {
+        console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    }
     next();
 })
 
@@ -21,7 +23,10 @@ app.use("/tags", tagsRouter);
 
 app.use("/assets", assetsRouter);
 
-const PORT = 4000;
-app.listen(PORT, () => {
-    console.log(`API http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== "test") {
+    const PORT = 4000;
+    app.listen(PORT, () => {
+        console.log(`API http://localhost:${PORT}`);
+    });
+}
+export default app

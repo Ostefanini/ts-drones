@@ -5,11 +5,11 @@ export const assetTypeSchema = z.enum(["2d", "3d", "script"]);
 
 export const assetSchema = z.object({
   id: z.uuid(),
-  thumbnail: z.uuid(), // refers to the thumbnail asset id stored separately
   name: z.string().min(1),
-  description: z.string().nullable().meta({ description: "optionnal" }),
+  thumbnail: z.uuid(), // refers to the thumbnail asset id stored separately
+  video: z.url().nullable(),
+  description: z.string(),
   type: assetTypeSchema,
-  priceEur: z.number().nonnegative(),
   durationSec: z.number().nonnegative().nullable(),
   nbUav: z.number().nonnegative().nullable(),
   tags: z.array(tagSchema).min(1),

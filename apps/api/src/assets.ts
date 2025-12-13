@@ -3,9 +3,9 @@ import sharp from "sharp";
 import * as z from "zod/v4";
 import { type Asset, assetCreateTextFieldsSchema, assetUpdateSchema } from "@ts-drones/shared";
 
-import { assets, thumbnails } from "./services/db.js";
-import { validateAssetId, validateUniqueTags } from "./validators.js";
-import { upload } from "./services/multer.js";
+import { assets, thumbnails } from "./services/db";
+import { validateAssetId, validateUniqueTags } from "./validators";
+import { upload } from "./services/multer";
 
 const assetsRouter = express.Router();
 
@@ -40,12 +40,10 @@ assetsRouter.post("/",
 
         const normalizedBody = {
             ...req.body,
-            priceEur: Number(req.body.priceEur),
             durationSec: Number(req.body.durationSec),
             nbUav: Number(req.body.nbUav),
         };
         req.body = normalizedBody;
-        console.log("Normalized body:", normalizedBody);
         const parsed = assetCreateTextFieldsSchema.safeParse(normalizedBody);
         if (!parsed.success) {
             return res.status(400).json({ error: "validation", issues: parsed.error.issues });

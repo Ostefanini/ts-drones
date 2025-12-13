@@ -1,11 +1,12 @@
 import express from "express";
 import sharp from "sharp";
 import * as z from "zod/v4";
-import { type Asset, assetCreateTextFieldsSchema, assetUpdateSchema } from "@ts-drones/shared";
+import { type Asset, assetCreateTextFieldsSchema, assetUpdateSchema, demoPlaystationModels } from "@ts-drones/shared";
 
 import { assets, thumbnails } from "./services/db";
 import { validateAssetId, validateUniqueTags } from "./validators";
 import { upload } from "./services/multer";
+import _ from "lodash";
 
 const assetsRouter = express.Router();
 
@@ -49,6 +50,18 @@ assetsRouter.post("/",
             return res.status(400).json({ error: "validation", issues: parsed.error.issues });
         } else if (!validateUniqueTags(parsed.data)) {
             return res.status(400).json({ error: "validation", message: "Asset tags must be unique" });
+        }
+        if (process.env.NODE_ENV === "production") {
+            let isAllowed = false;
+            Object.values(demoPlaystationModels).forEach(validModel => {
+                if (_.isEqual(parsed.data, validModel)
+                    && assets.find(({ name }) => name === parsed.data.name) === undefined) {
+                    isAllowed = true;
+                }
+            });
+            if (!isAllowed) {
+                return res.status(400).json({ error: "validation", message: "In production, only demo assets are allowed" });
+            }
         }
 
         const imgUuid = crypto.randomUUID();

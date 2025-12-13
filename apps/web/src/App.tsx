@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { type Asset, type Tag, assetCreateSchema } from "@ts-drones/shared";
+import { type Asset, type Tag, assetCreateSchema, demoPlaystationModels } from "@ts-drones/shared";
 import '@mantine/core/styles.css';
 import { Center, Title, Button, Card, Image, Group, Text, Badge, SimpleGrid, Menu, Box, Indicator, Divider } from '@mantine/core';
 import { serialize } from 'object-to-formdata';
-import { IconCloudComputing, IconDatabase, IconDrone, IconHourglassEmpty, IconPlaylist, IconPlaylistAdd, IconTimeDuration0, IconTrash } from "@tabler/icons-react";
+import { IconCloudComputing, IconDatabase, IconDrone, IconHourglassEmpty, IconPlaylist, IconPlaylistAdd, IconTrash } from "@tabler/icons-react";
 
 import api from "./services/api";
-import { demoPlaystationModels } from "./constants";
 import showsConst from "./playstation_shows.json";
 
 
@@ -69,14 +68,7 @@ function App() {
                         const imgBlob = await res.blob();
                         const sendData = {
                           thumbnail: new File([imgBlob], filename, { type: "image/png" }),
-                          description: model.description,
-                          name: model.name,
-                          durationSec: model.duration,
-                          nbUav: model.nbUav,
-                          priceEur: 0,
-                          video: model.videoLink,
-                          type: "2d",
-                          tags: ["playstation"],
+                          ...model,
                         }
                         const safeData = assetCreateSchema.safeParse(sendData);
                         if (!safeData.success) {

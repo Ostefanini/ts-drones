@@ -4,9 +4,9 @@ import { tagsRouter } from "./tags";
 import { assetsRouter } from "./assets";
 
 const app = express();
-app.use((_req, _res, next) => {
+app.use((req, res, next) => {
     if (process.env.NODE_ENV === "development") {
-        return cors()
+        return cors()(req, res, next);
     }
     return next()
 });

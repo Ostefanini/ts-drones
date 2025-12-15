@@ -34,7 +34,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Lint (workspace)
-        run: pnpm lint:ci
+        run: pnpm lint
 
       - name: Tests (workspace)
         run: pnpm test

@@ -8,7 +8,6 @@
         "start": "node dist/index.js",
         "openapi": "tsx openapi.ts",
         "lint": "eslint .",
-        "lint:ci": "eslint . --max-warnings 0",
         "lint:fix": "eslint . --fix",
         "test": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js"
     },

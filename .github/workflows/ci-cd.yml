@@ -33,6 +33,9 @@ jobs:
       - run: pnpm -v
       - run: pnpm install --frozen-lockfile
 
+      - run: node -v
+      - run: pnpm --filter web exec eslint -v
+
       - name: Lint (workspace)
         run: pnpm lint
 

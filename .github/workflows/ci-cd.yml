@@ -31,7 +31,7 @@ jobs:
           #run_install: false
 
       - run: pnpm -v
-      - run: pnpm -w install --frozen-lockfile
+      - run: pnpm install
 
       - name: Lint (workspace)
         run: pnpm lint
@@ -84,7 +84,7 @@ jobs:
         with:
           host: ts-drones.drawnlights.show
           username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_KEY }} 
+          key: ${{ secrets.DEPLOY_KEY }}
           script: |
             set -e
             cd "${{ secrets.DEPLOY_PATH }}"

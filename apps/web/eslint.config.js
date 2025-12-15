@@ -7,6 +7,11 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 import reactX from 'eslint-plugin-react-x'
 import reactDom from 'eslint-plugin-react-dom'
 
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 export default defineConfig([
   globalIgnores(['dist', 'node_modules']),
   {

@@ -33,6 +33,8 @@ jobs:
       - run: pnpm -v
       - run: pnpm install --frozen-lockfile
 
+      - run: pnpm -r --filter @ts-drones/shared build
+
       - run: node -v
       - run: pnpm --filter web exec eslint -v
 

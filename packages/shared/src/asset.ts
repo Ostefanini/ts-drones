@@ -1,5 +1,5 @@
 import * as z from "zod/v4";
-import { tagSchema } from "./tag";
+import { tagSchema } from "./tag.js";
 
 export const assetTypeSchema = z.enum(["2d", "3d", "script"]);
 

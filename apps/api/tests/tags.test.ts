@@ -2,9 +2,9 @@ import { beforeEach, describe, expect, test } from '@jest/globals';
 import request from "supertest";
 import _ from 'lodash';
 
-import { assets } from "../src/services/db";
-import app from "../src/index";
-import { fullAsset } from './data/assets';
+import { assets } from "../src/services/db.js";
+import app from "../src/index.js";
+import { fullAsset } from './data/assets.js';
 
 describe('Tags endpoints', () => {
     beforeEach(() => {

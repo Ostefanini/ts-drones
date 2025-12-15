@@ -2,6 +2,10 @@
     "name": "ts-drones",
     "private": true,
     "version": "1.0.0",
+    "scripts": {
+        "lint": "pnpm --filter web lint && pnpm --filter api lint",
+        "test": "pnpm --filter web test && pnpm --filter api test"
+    },
     "devDependencies": {
         "typescript": "^5.9.3"
     }

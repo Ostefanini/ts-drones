@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { type Asset, type Tag, assetCreateSchema, demoPlaystationModels } from "@ts-drones/shared";
+import { type Asset, assetCreateSchema, demoPlaystationModels } from "@ts-drones/shared";
 import '@mantine/core/styles.css';
 import { Center, Title, Button, Card, Image, Group, Text, Badge, SimpleGrid, Menu, Box, Indicator, Divider } from '@mantine/core';
 import { serialize } from 'object-to-formdata';
 import { IconCloudComputing, IconDatabase, IconDrone, IconHourglassEmpty, IconPlaylist, IconPlaylistAdd, IconTrash } from "@tabler/icons-react";
 
-import api from "./services/api";
+import api from "./services/api.js";
 import showsConst from "./playstation_shows.json";
 
 
@@ -13,37 +13,30 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   const [assets, setAssets] = useState<Asset[]>([]);
-  const [tags, setTags] = useState<Tag[]>([]);
   const [playlist, setPlaylist] = useState<Asset[]>([]);
   const [showVideo, setShowVideo] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function load() {
-      try {
-        const [{ data: a }, { data: b }] = await Promise.all([
-          api.get<Asset[]>("/assets"),
-          api.get<Tag[]>("/tags"),
-        ]);
-
-        if (!cancelled) {
-          setAssets(a);
-          setTags(b);
-          setLoading(false);
-        }
-      } catch (e) {
-        if (!cancelled) {
-          console.error(e);
-        }
+    (async () => {
+      const { data } = await api.get<Asset[]>("/assets");
+      if (!cancelled) {
+        setAssets(data);
+        setLoading(false);
       }
-    }
+    })().catch((e) => {
+      if (!cancelled) {
+        setLoading(false);
+        console.error("Failed to load assets", e);
+      }
+    });
 
-    load();
     return () => {
       cancelled = true;
     };
   }, []);
+
 
   if (loading) return <div>Chargement…</div>;
 
@@ -60,31 +53,35 @@ function App() {
               <Center>No asset yet, let's populate the database !</Center>
               <Center style={{ marginTop: "12px" }}>
                 <Button
-                  onClick={async () => {
-                    try {
-                      await Promise.all(demoPlaystationModels.map(async (model) => {
-                        const filename = `${model.name}.png`;
-                        const res = await fetch(`/public/${filename}`);
-                        const imgBlob = await res.blob();
-                        const sendData = {
-                          thumbnail: new File([imgBlob], filename, { type: "image/png" }),
-                          ...model,
-                        }
-                        const safeData = assetCreateSchema.safeParse(sendData);
-                        if (!safeData.success) {
-                          console.error(safeData.error);
-                          throw new Error("Invalid asset data");
-                        }
+                  onClick={() => {
+                    void (async () => {
+                      try {
+                        await Promise.all(
+                          demoPlaystationModels.map(async (model) => {
+                            const filename = `${model.name}.png`;
+                            const res = await fetch(`/${filename}`);
+                            const imgBlob = await res.blob();
 
-                        const serializeData = serialize(safeData.data);
-                        console.log(serializeData);
+                            const sendData = {
+                              thumbnail: new File([imgBlob], filename, { type: "image/png" }),
+                              ...model,
+                            };
 
-                        const { data } = await api.post<Asset>("/assets", serializeData)
-                        setAssets((prev) => [...prev, data]);
-                      }))
-                    } catch (e) {
-                      console.error(e);
-                    }
+                            const safeData = assetCreateSchema.safeParse(sendData);
+                            if (!safeData.success) {
+                              console.error(safeData.error);
+                              throw new Error("Invalid asset data");
+                            }
+
+                            const serializedData = serialize(safeData.data);
+                            const { data } = await api.post<Asset>("/assets", serializedData);
+                            setAssets((prev) => [...prev, data]);
+                          })
+                        );
+                      } catch (e) {
+                        console.error(e);
+                      }
+                    })();
                   }}
                 >
                   Populate
@@ -102,6 +99,7 @@ function App() {
               >
                 {assets.map((asset) => (
                   <Card
+                    key={asset.id}
                     style={{
                       transition: "transform 0.2s ease-in-out",
                       cursor: "pointer",
@@ -122,14 +120,17 @@ function App() {
                   >
                     <Card.Section style={{ position: "relative" }}>
                       <Button
-                        onClick={async (e) => {
+                        onClick={(e) => {
                           e.stopPropagation();
-                          try {
-                            await api.delete(`/assets/${asset.id}`);
-                            setAssets(assets.filter(a => a.id !== asset.id));
-                          } catch (error) {
-                            console.error(error);
-                          }
+
+                          void (async () => {
+                            try {
+                              await api.delete(`/assets/${asset.id}`);
+                              setAssets(assets.filter(a => a.id !== asset.id));
+                            } catch (error) {
+                              console.error(error);
+                            }
+                          })();
                         }}
                         color="red"
                         size="compact-xs"
@@ -290,7 +291,7 @@ function App() {
                   onClick={() => {
                     const combinationName = playlist.map(({ name }) => name).join(",");;
                     const fullNameNotVr = `source_0_${combinationName}_glossy.mp4`
-                    const linkNotVr = showsConst.find((show: any) => show.isVr === false && show.fullName === fullNameNotVr)?.link;
+                    const linkNotVr = showsConst.find((show) => show.isVr === false && show.fullName === fullNameNotVr)?.link;
                     if (linkNotVr) {
                       setShowVideo(linkNotVr);
                       setTimeout(() => {

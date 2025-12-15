@@ -4,8 +4,8 @@ import fs from "fs";
 import _ from "lodash";
 
 import app from "../src/index";
-import { assets } from "../src/services/db";
-import { assetPayload, fullAsset } from "./data/assets";
+import { assets } from "../src/services/db.js";
+import { assetPayload, fullAsset } from "./data/assets.js";
 
 describe('Assets endpoints', () => {
     beforeEach(() => {

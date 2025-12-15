@@ -14,4 +14,9 @@ export default {
     }],
     ...tsJestTransformCfg,
   },
+
+  // Permet à Jest de résoudre "../x.js" vers "../x"
+  moduleNameMapper: {
+    "^(\\.{1,2}/.*)\\.js$": "$1",
+  },
 };

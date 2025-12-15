@@ -1,5 +1,5 @@
 import express from "express";
-import { assets } from "./services/db";
+import { assets } from "./services/db.js";
 
 const tagsRouter = express.Router();
 

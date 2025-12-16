@@ -13,6 +13,9 @@ RUN corepack enable && \
 COPY packages/shared ./packages/shared
 COPY apps/api ./apps/api
 
+WORKDIR /workspace/packages/shared
+RUN pnpm build
+
 WORKDIR /workspace/apps/api
 RUN pnpm build
 

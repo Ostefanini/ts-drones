@@ -11,6 +11,9 @@ RUN corepack enable && pnpm install --frozen-lockfile
 COPY packages/shared ./packages/shared
 COPY apps/web ./apps/web
 
+WORKDIR /workspace/packages/shared
+RUN pnpm build
+
 WORKDIR /workspace/apps/web
 RUN pnpm build
 

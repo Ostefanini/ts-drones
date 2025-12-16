@@ -4,6 +4,7 @@ import '@mantine/core/styles.css';
 import { Center, Title, Button, Card, Image, Group, Text, Badge, SimpleGrid, Menu, Box, Indicator, Divider } from '@mantine/core';
 import { serialize } from 'object-to-formdata';
 import { IconCloudComputing, IconDatabase, IconDrone, IconHourglassEmpty, IconPlaylist, IconPlaylistAdd, IconTrash } from "@tabler/icons-react";
+import GithubCorner from 'react-github-corner';
 
 import api from "./services/api.js";
 import showsConst from "./playstation_shows.json";
@@ -38,10 +39,13 @@ function App() {
   }, []);
 
 
-  if (loading) return <div>Chargement…</div>;
+  if (loading) return <div>Loading…</div>;
 
   return (
     <>
+      <GithubCorner
+        href="https://github.com/Ostefanini/ts-drones"
+      />
       <div
         style={{ marginTop: "30px" }}
       >

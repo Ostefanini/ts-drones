@@ -1,0 +1,107 @@
+import { type Asset } from "@ts-drones/shared";
+import { Box, Button, Indicator, Menu, Text } from '@mantine/core';
+import { IconCloudComputing, IconPlaylist, IconTrash } from "@tabler/icons-react";
+
+interface ComputeMenuProps {
+    playlist: Asset[];
+    onRemoveFromPlaylist: (asset: Asset) => void;
+    onCompute: () => void;
+}
+
+export function ComputeMenu({ playlist, onRemoveFromPlaylist, onCompute }: ComputeMenuProps) {
+    if (playlist.length === 0) return null;
+
+    return (
+        <Box style={{ position: "fixed", bottom: 24, right: 24, zIndex: 1000 }}>
+            <Menu
+                transitionProps={{ transition: 'pop-top-right' }}
+                width={220}
+                withinPortal
+                radius="md"
+            >
+                <Menu.Target>
+                    <Indicator inline label={playlist.length} size={24}>
+                        <Button
+                            size="xl"
+                            p={20}
+                            radius="xl"
+                            styles={{
+                                root: {
+                                    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                                    boxShadow: "0 8px 16px rgba(102, 126, 234, 0.4)",
+                                    border: "3px solid rgba(255, 255, 255, 0.3)",
+                                    '&:hover': {
+                                        background: "linear-gradient(135deg, #7c8ef5 0%, #8b5bb5 100%)",
+                                        boxShadow: "0 12px 24px rgba(102, 126, 234, 0.5)",
+                                        border: "1px solid rgba(255, 255, 255, 0.5)",
+                                    }
+                                }
+                            }}
+                        >
+                            <IconPlaylist size={20} />
+                        </Button>
+                    </Indicator>
+                </Menu.Target>
+                <Menu.Dropdown
+                    style={{
+                        backgroundColor: "#663399",
+                        border: "2px solid #667eea",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                    }}
+                >
+                    {playlist.map((asset) => (
+                        <Menu.Item
+                            key={asset.id}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                            }}
+                            style={{ borderBottom: '1px solid white' }}
+                            rightSection={
+                                <IconTrash
+                                    size={16}
+                                    color={"red"}
+                                    stroke={1.5}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onRemoveFromPlaylist(asset);
+                                    }}
+                                    style={{ cursor: "pointer" }}
+                                />
+                            }
+                        >
+                            <Text c="white">
+                                {asset.name}
+                            </Text>
+                        </Menu.Item>
+                    ))}
+                    <Menu.Item
+                        key={"compute"}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                        }}
+                        style={{
+                            marginTop: '8px',
+                        }}
+                    >
+                        <Button
+                            style={{
+                                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                            }}
+                            fullWidth
+                            onClick={onCompute}
+                        >
+                            <Text c="white">
+                                <IconCloudComputing
+                                    size={16}
+                                    stroke={1.5}
+                                    style={{ cursor: "pointer", marginRight: "8px" }}
+                                />
+                                Compute
+                            </Text>
+                        </Button>
+                    </Menu.Item>
+                </Menu.Dropdown>
+            </Menu>
+        </Box>
+    );
+}

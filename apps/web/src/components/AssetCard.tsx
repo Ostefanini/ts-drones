@@ -1,0 +1,113 @@
+import { type Asset } from "@ts-drones/shared";
+import { Card, Image, Group, Text, Badge, Button, Title } from '@mantine/core';
+import { IconDrone, IconHourglassEmpty, IconPlaylistAdd, IconTrash } from "@tabler/icons-react";
+
+interface AssetCardProps {
+    asset: Asset;
+    onDelete: (assetId: string) => void;
+    onAddToPlaylist: (asset: Asset) => void;
+}
+
+export function AssetCard({ asset, onDelete, onAddToPlaylist }: AssetCardProps) {
+    return (
+        <Card
+            key={asset.id}
+            style={{
+                transition: "transform 0.2s ease-in-out",
+                cursor: "pointer",
+                position: "relative"
+            }}
+            onMouseEnter={(e) => {
+                if (window.matchMedia("(hover: hover)").matches) {
+                    e.currentTarget.style.transform = "scale(1.1)";
+                }
+            }}
+            onMouseLeave={(e) => {
+                if (window.matchMedia("(hover: hover)").matches) {
+                    e.currentTarget.style.transform = "scale(1)";
+                }
+            }}
+            radius={"md"}
+            withBorder
+        >
+            <Card.Section style={{ position: "relative" }}>
+                <Button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(asset.id);
+                    }}
+                    color="red"
+                    size="compact-xs"
+                    style={{
+                        position: "absolute",
+                        top: "0px",
+                        right: "0px",
+                        zIndex: 10,
+                        minWidth: "auto",
+                    }}
+                >
+                    <IconTrash size={20} />
+                </Button>
+                {asset.video ? (
+                    <div
+                        style={{
+                            width: "100%",
+                            aspectRatio: "16 / 9",
+                            overflow: "hidden",
+                            position: "relative",
+                        }}
+                    >
+                        <iframe
+                            src={asset.video}
+                            style={{
+                                position: "absolute",
+                                inset: 0,
+                                width: "100%",
+                                height: "100%",
+                                border: "none",
+                                transform: "scale(1.2)",
+                            }}
+                            allow="autoplay"
+                        />
+                    </div>
+                ) : (
+                    <Image
+                        height={200}
+                        width={"auto"}
+                        src={`http://localhost:4000/assets/thumbnail/${asset.thumbnail}`}
+                        alt={asset.name}
+                    />
+                )}
+            </Card.Section>
+            <Group mt="md" mb="xs">
+                <Title order={3}>{asset.name}</Title>
+                <div style={{ position: "absolute", right: "12px" }}>
+                    <Badge color="violet" key={asset.type}>{asset.type}</Badge>
+                    {asset.tags.map((tag) => <Badge color="pink" key={tag}>#{tag}</Badge>)}
+                </div>
+            </Group>
+
+            {asset.description && <Text size="sm" c="dimmed">
+                {asset.description}
+            </Text>}
+
+            <Group gap="xs" mt="xs">
+                <IconDrone size={16} />
+                <Text size="sm">{asset.nbUav} Drones</Text>
+                <Text size="sm">•</Text>
+                <IconHourglassEmpty size={16} />
+                <Text size="sm">{asset.durationSec} seconds</Text>
+            </Group>
+
+            <Button
+                onClick={() => onAddToPlaylist(asset)}
+                fullWidth={false}
+                size={"xs"}
+                color="blue"
+                mt="md"
+            >
+                <IconPlaylistAdd />
+            </Button>
+        </Card>
+    );
+}

@@ -4,7 +4,7 @@ This project serves to prove that after being trained at Epitech, writing TypeSc
 
 ## Live demo
 
-https://ts-drones.drawnlights.show
+https://ts-drones.drawnlights.show:3002
 
 ## Link to drawn show/lights
 

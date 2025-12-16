@@ -83,6 +83,7 @@ jobs:
   deploy:
     needs: build_and_push
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Debug secrets presence (safe)
         run: |

@@ -84,6 +84,11 @@ jobs:
     needs: build_and_push
     runs-on: ubuntu-latest
     steps:
+      - name: Debug secrets presence (safe)
+        run: |
+          echo "DEPLOY_USER is set? ${{ secrets.DEPLOY_USER != '' }}"
+          echo "DEPLOY_KEY length:" $(printf '%s' "${{ secrets.DEPLOY_KEY }}" | wc -c)
+
       - name: Deploy (SSH -> docker compose)
         uses: appleboy/ssh-action@v1.0.3
         with:

@@ -90,6 +90,7 @@ jobs:
           host: ts-drones.drawnlights.show
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
+          port: ${{ secrets.DEPLOY_PORT }}
           script: |
             set -e
             cd "${{ secrets.DEPLOY_PATH }}"

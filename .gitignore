@@ -4,3 +4,4 @@ dist/
 coverage
 certs/*
 !certs/.gitkeep
+.env

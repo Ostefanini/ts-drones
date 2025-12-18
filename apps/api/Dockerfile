@@ -24,6 +24,8 @@ COPY apps/api ./apps/api
 RUN pnpm -C packages/shared build
 
 # Generate Prisma Client
+ARG DATABASE_URL="postgresql://user:pass@localhost:5432/db?schema=public"
+ENV DATABASE_URL=$DATABASE_URL
 RUN pnpm -C apps/api exec prisma generate
 
 # Build API

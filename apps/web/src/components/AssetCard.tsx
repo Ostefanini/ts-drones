@@ -1,6 +1,7 @@
 import { type Asset } from "@ts-drones/shared";
 import { Card, Image, Group, Text, Badge, Button, Title } from '@mantine/core';
 import { IconDrone, IconHourglassEmpty, IconPlaylistAdd } from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 
 interface AssetCardProps {
     asset: Asset;
@@ -8,6 +9,7 @@ interface AssetCardProps {
 }
 
 export function AssetCard({ asset, onAddToPlaylist }: AssetCardProps) {
+    const { t } = useTranslation();
     return (
         <Card
             key={asset.id}
@@ -75,10 +77,10 @@ export function AssetCard({ asset, onAddToPlaylist }: AssetCardProps) {
 
             <Group gap="xs" mt="xs">
                 <IconDrone size={16} />
-                <Text size="sm">{asset.nbUav} Drones</Text>
+                <Text size="sm">{asset.nbUav} {t('drones')}</Text>
                 <Text size="sm">•</Text>
                 <IconHourglassEmpty size={16} />
-                <Text size="sm">{asset.durationSec} seconds</Text>
+                <Text size="sm">{asset.durationSec} {t('seconds')}</Text>
             </Group>
 
             <Button

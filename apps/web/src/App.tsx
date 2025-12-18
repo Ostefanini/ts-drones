@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   type Asset, type CombinationStatus,
   demoPlaystationModels, type Sound,
@@ -30,6 +31,7 @@ import { HighscoreTable } from "./components/HighscoreTable";
 
 
 function App() {
+  const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(true);
 
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -80,29 +82,57 @@ function App() {
   }, [isNew])
 
 
-  if (loading) return <div>Loading…</div>;
+  if (loading) return <div>{t('loading')}</div>;
 
   return (
     <>
+      <div style={{ position: 'absolute', top: 20, left: 20, display: 'flex', gap: 10, zIndex: 1000 }}>
+        <div
+          onClick={() => i18n.changeLanguage('fr')}
+          style={{
+            cursor: 'pointer',
+            fontSize: '24px',
+            border: i18n.language === 'fr' ? '2px solid white' : '2px solid transparent',
+            borderRadius: '4px',
+            padding: '2px',
+            lineHeight: '1'
+          }}
+        >
+          🇫🇷
+        </div>
+        <div
+          onClick={() => i18n.changeLanguage('en')}
+          style={{
+            cursor: 'pointer',
+            fontSize: '24px',
+            border: i18n.language === 'en' ? '2px solid white' : '2px solid transparent',
+            borderRadius: '4px',
+            padding: '2px',
+            lineHeight: '1'
+          }}
+        >
+          🇬🇧
+        </div>
+      </div>
       <GithubCorner
         href="https://github.com/Ostefanini/ts-drones"
       />
       <div
         style={{ marginTop: "30px" }}
       >
-        <Title ta='center' order={1}>TS - Drones</Title>
-        <Title ta="center" order={3}>A minimalist gamified version of the drawn lights app</Title>
+        <Title ta='center' order={1}>{t('title')}</Title>
+        <Title ta="center" order={3}>{t('subtitle')}</Title>
 
         <TechnologiesSection />
 
-        <Text fs="italic" ta="center">Try discovering an exclusive drone show combination right now !</Text>
-        <Center style={{ marginTop: "8px" }}><Button onClick={() => setShowScore((prev) => !prev)}>{showScore ? "Hide Scores" : "Show Scores"}</Button></Center>
+        <Text fs="italic" ta="center">{t('try_discovering')}</Text>
+        <Center style={{ marginTop: "8px" }}><Button onClick={() => setShowScore((prev) => !prev)}>{showScore ? t('hide_scores') : t('show_scores')}</Button></Center>
         <div style={{ marginTop: "24px" }}>
           {!showScore && (
             <div>
               {assets.length === 0 && playlist.length === 0 && (
                 <div>
-                  <Center>No asset yet, let's populate the database !</Center>
+                  <Center>{t('no_asset')}</Center>
                   <Center style={{ marginTop: "12px" }}>
                     <Button
                       onClick={() => {
@@ -130,7 +160,7 @@ function App() {
                         })();
                       }}
                     >
-                      Populate
+                      {t('populate')}
                       <IconDatabase />
                     </Button>
                   </Center>
@@ -165,10 +195,10 @@ function App() {
                     const validatedSound = ['healing', 'emerveille', 'glossy'].includes(val) ? val : null;
                     setSound(validatedSound as Sound);
                   }}
-                  label="Select Audio Track"
+                  label={t('select_audio')}
                 >
                   <Stack gap="xs" mt="xs">
-                    <Radio value="none" label="No sound" />
+                    <Radio value="none" label={t('no_sound')} />
                     {['healing', 'emerveille', 'glossy'].map((track) => (
                       <Group key={track}>
                         <Radio value={track} label={track} />

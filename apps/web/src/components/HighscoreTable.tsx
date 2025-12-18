@@ -1,18 +1,20 @@
 import { type UserListHighscore } from "@ts-drones/shared";
 import { Center, Table } from '@mantine/core';
+import { useTranslation } from "react-i18next";
 
 interface HighscoreTableProps {
     highscore: UserListHighscore[];
 }
 
 export const HighscoreTable = ({ highscore }: HighscoreTableProps) => {
+    const { t } = useTranslation();
     return (
         <Center>
             <Table w={500}>
                 <Table.Thead>
                     <Table.Tr>
-                        <Table.Th>Nickname</Table.Th>
-                        <Table.Th>Combinations found</Table.Th>
+                        <Table.Th>{t('nickname')}</Table.Th>
+                        <Table.Th>{t('combinations_found')}</Table.Th>
                     </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>

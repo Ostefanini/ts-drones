@@ -3,6 +3,7 @@ import {
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { type Asset, type Sound, type UserListHighscore } from "@ts-drones/shared";
+import { useTranslation } from "react-i18next";
 import api from "../services/api";
 import { computeAssetQueryParams } from "../helpers";
 
@@ -31,6 +32,7 @@ export const ResultSection = ({
     sound,
     setHighscore
 }: ResultSectionProps) => {
+    const { t } = useTranslation();
     const combobox = useCombobox({
         onDropdownClose: () => combobox.resetSelectedOption(),
     });
@@ -49,7 +51,7 @@ export const ResultSection = ({
     return (
         <>
             <Divider my="sm" />
-            <Title ta='center' order={2}>Render result (With sound 📢)</Title>
+            <Title ta='center' order={2}>{t('render_result')}</Title>
             <Center>
                 <Group align="flex-end" gap="sm">
                     <Combobox
@@ -70,7 +72,7 @@ export const ResultSection = ({
                     >
                         <Combobox.Target>
                             <InputBase
-                                label="Found by"
+                                label={t('found_by')}
                                 rightSection={<Combobox.Chevron />}
                                 value={foundBy || ''}
                                 disabled={!isNew}
@@ -85,7 +87,7 @@ export const ResultSection = ({
                                     combobox.closeDropdown();
                                     setFoundBy(foundBy || '');
                                 }}
-                                placeholder="Attribute your discovery"
+                                placeholder={t('attribute_discovery')}
                                 rightSectionPointerEvents="none"
                             />
                         </Combobox.Target>
@@ -94,7 +96,7 @@ export const ResultSection = ({
                             <Combobox.Options>
                                 {options}
                                 {!exactOptionMatch && foundBy && foundBy.trim().length > 0 && (
-                                    <Combobox.Option value="$create">+ Create {foundBy}</Combobox.Option>
+                                    <Combobox.Option value="$create">{t('create_user', { user: foundBy })}</Combobox.Option>
                                 )}
                             </Combobox.Options>
                         </Combobox.Dropdown>
@@ -108,8 +110,8 @@ export const ResultSection = ({
                                         userNickname: foundBy,
                                     });
                                     notifications.show({
-                                        title: 'Success',
-                                        message: 'Your discovery has been recorded!',
+                                        title: t('success'),
+                                        message: t('discovery_recorded'),
                                         color: 'green',
                                     });
                                     setIsNew(null);
@@ -119,7 +121,7 @@ export const ResultSection = ({
                                 }
                             })();
                         }}
-                    >Save</Button>
+                    >{t('save')}</Button>
                 </Group>
             </Center>
             <Center>

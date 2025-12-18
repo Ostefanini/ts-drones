@@ -1,6 +1,7 @@
 import { type Asset, type Sound } from "@ts-drones/shared";
 import { Box, Button, Indicator, Menu, Text } from '@mantine/core';
 import { IconCloudComputing, IconPlaylist, IconTrash } from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 
 interface ComputeMenuProps {
     playlist: Asset[];
@@ -10,6 +11,7 @@ interface ComputeMenuProps {
 }
 
 export function ComputeMenu({ playlist, audio, onRemoveFromPlaylist, onCompute }: ComputeMenuProps) {
+    const { t } = useTranslation();
     if (playlist.length === 0) return null;
 
     return (
@@ -50,7 +52,7 @@ export function ComputeMenu({ playlist, audio, onRemoveFromPlaylist, onCompute }
                         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
                     }}
                 >
-                    <Menu.Label c="white">Figures</Menu.Label>
+                    <Menu.Label c="white">{t('figures')}</Menu.Label>
                     {playlist.map((asset) => (
                         <Menu.Item
                             key={asset.id}
@@ -80,9 +82,9 @@ export function ComputeMenu({ playlist, audio, onRemoveFromPlaylist, onCompute }
 
                     <>
                         <Menu.Divider />
-                        <Menu.Label c="white">Audio</Menu.Label>
+                        <Menu.Label c="white">{t('audio')}</Menu.Label>
                         <Menu.Item style={{ borderBottom: '1px solid white' }}>
-                            <Text c="white">{audio === "none" ? "No sound" : audio}</Text>
+                            <Text c="white">{audio === "none" ? t('no_sound') : audio}</Text>
                         </Menu.Item>
                     </>
 

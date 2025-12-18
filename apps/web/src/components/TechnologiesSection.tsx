@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Group, Image, Tooltip, Title } from '@mantine/core';
 import Marquee from "react-fast-marquee";
+import { useTranslation } from "react-i18next";
 
 const technologies = [
     { name: "TypeScript", url: "https://cdn.simpleicons.org/typescript/3178C6" },
@@ -37,9 +38,10 @@ const TechLogo = ({ label, src }: { label: string, src: string }) => {
 };
 
 export const TechnologiesSection = () => {
+    const { t } = useTranslation();
     return (
         <>
-            <Title ta="center" style={{ marginTop: "16px" }} order={4}>Technologies used</Title>
+            <Title ta="center" style={{ marginTop: "16px" }} order={4}>{t('technologies_used')}</Title>
             <Marquee autoFill pauseOnHover style={{ marginBottom: '24px' }}>
                 <Group gap="xl" style={{ paddingRight: 'var(--mantine-spacing-xl)' }}>
                     {technologies.map((tech) => (

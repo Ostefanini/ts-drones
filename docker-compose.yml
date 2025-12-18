@@ -11,6 +11,8 @@ services:
   web:
     image: ghcr.io/ostefanini/ts-drones/web:latest
     container_name: "web"
+    group_add:
+      - "120"
     volumes:
       - /etc/letsencrypt/live/:/certs/live:ro
       - /etc/letsencrypt/archive:/certs/archive:ro

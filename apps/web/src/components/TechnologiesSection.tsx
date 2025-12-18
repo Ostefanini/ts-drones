@@ -14,6 +14,7 @@ const technologies = [
     { name: "Zod", url: "https://cdn.simpleicons.org/zod/3E67B1" },
     { name: "OpenAPI", url: "https://cdn.simpleicons.org/openapiinitiative/6BA539" },
     { name: "React", url: "https://cdn.simpleicons.org/react/61DAFB" },
+    { name: "react-i18next", url: "https://cdn.simpleicons.org/i18next/26A69A" },
     { name: "Jest", url: "https://cdn.simpleicons.org/jest/C21325" },
     { name: "Express", url: "https://cdn.simpleicons.org/express/000000" },
     { name: "Nginx", url: "https://cdn.simpleicons.org/nginx/009639" },

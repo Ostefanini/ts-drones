@@ -43,6 +43,8 @@ jobs:
 
       - name: Prisma generate (api)
         run: pnpm --filter api exec prisma generate
+        env:
+          DATABASE_URL: "postgresql://user:pass@localhost:5432/db?schema=public"
 
       - name: Tests (workspace)
         run: pnpm test

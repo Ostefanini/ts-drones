@@ -31,6 +31,13 @@ enum AssetName {
   CROSS
 }
 
+enum Sound {
+  NONE
+  EMERVEILLE
+  HEALING
+  GLOSSY
+}
+
 model User {
   id           String        @id @default(uuid())
   nickname     String        @unique
@@ -60,6 +67,7 @@ model Combination {
   foundAt    DateTime   @default(now())
   foundBy    User       @relation(fields: [foundById], references: [id])
   foundById  String
+  sound      Sound      @default(NONE)
 
-  @@unique([assetOne, assetTwo, assetThree, assetFour, foundById])
+  @@unique([assetOne, assetTwo, assetThree, assetFour, sound, foundById])
 }

@@ -1,10 +1,10 @@
 import express, { Request, Response } from "express";
-
+import isProfane from '@idrisay/profanity-check';
+import { CombinationStatus, userNicknameSchema } from "@ts-drones/shared";
 
 import { checkCombination, validateCombinationQuery } from "./validators.js";
-import isProfane from '@idrisay/profanity-check';
-import { userNicknameSchema } from "@ts-drones/shared";
 import { prisma } from "./services/prisma.js";
+import { formatSound } from "./helpers/formatters.js";
 
 const combinationsRouter = express.Router();
 
@@ -12,11 +12,11 @@ combinationsRouter.get("/is-found",
     validateCombinationQuery,
     checkCombination,
     async (_req: Request, res: Response) => {
-        if (res.locals.combination) {
-            res.json({ exist: true, foundBy: res.locals.combination.foundBy.nickname });
-        } else {
-            res.json({ exist: false, foundBy: null });
-        }
+        const data: CombinationStatus = {
+            exist: res.locals.combination ? true : false,
+            foundBy: res.locals.combination ? res.locals.combination.foundBy.nickname : null,
+        };
+        res.json(data);
     }
 );
 
@@ -25,6 +25,7 @@ combinationsRouter.post("/attribute",
     checkCombination,
     async (req: Request, res: Response) => {
         try {
+            const sound = res.locals.sound || "none";
             if (res.locals.combination) {
                 res.status(400).json({ error: "Combination already exists" });
                 return;
@@ -45,6 +46,7 @@ combinationsRouter.post("/attribute",
                     assetTwo: res.locals.assetTwo ?? null,
                     assetThree: res.locals.assetThree ?? null,
                     assetFour: res.locals.assetFour ?? null,
+                    sound: formatSound(sound),
                     foundBy: {
                         connectOrCreate: {
                             where: { nickname: userNickname.data },

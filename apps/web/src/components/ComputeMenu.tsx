@@ -1,15 +1,15 @@
-import { type Asset } from "@ts-drones/shared";
+import { type Asset, type Sound } from "@ts-drones/shared";
 import { Box, Button, Indicator, Menu, Text } from '@mantine/core';
 import { IconCloudComputing, IconPlaylist, IconTrash } from "@tabler/icons-react";
-import { emojiBlasts } from "emoji-blast";
 
 interface ComputeMenuProps {
     playlist: Asset[];
+    audio: Sound;
     onRemoveFromPlaylist: (asset: Asset) => void;
     onCompute: () => void;
 }
 
-export function ComputeMenu({ playlist, onRemoveFromPlaylist, onCompute }: ComputeMenuProps) {
+export function ComputeMenu({ playlist, audio, onRemoveFromPlaylist, onCompute }: ComputeMenuProps) {
     if (playlist.length === 0) return null;
 
     return (
@@ -50,6 +50,7 @@ export function ComputeMenu({ playlist, onRemoveFromPlaylist, onCompute }: Compu
                         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
                     }}
                 >
+                    <Menu.Label c="white">Figures</Menu.Label>
                     {playlist.map((asset) => (
                         <Menu.Item
                             key={asset.id}
@@ -75,6 +76,16 @@ export function ComputeMenu({ playlist, onRemoveFromPlaylist, onCompute }: Compu
                             </Text>
                         </Menu.Item>
                     ))}
+
+
+                    <>
+                        <Menu.Divider />
+                        <Menu.Label c="white">Audio</Menu.Label>
+                        <Menu.Item style={{ borderBottom: '1px solid white' }}>
+                            <Text c="white">{audio === "none" ? "No sound" : audio}</Text>
+                        </Menu.Item>
+                    </>
+
                     <Menu.Item
                         key={"compute"}
                         onClick={(e) => {
@@ -89,9 +100,7 @@ export function ComputeMenu({ playlist, onRemoveFromPlaylist, onCompute }: Compu
                                 background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
                             }}
                             fullWidth
-                            onClick={() => {
-                                onCompute();
-                            }}
+                            onClick={onCompute}
                         >
                             <Text c="white">
                                 <IconCloudComputing
@@ -105,6 +114,6 @@ export function ComputeMenu({ playlist, onRemoveFromPlaylist, onCompute }: Compu
                     </Menu.Item>
                 </Menu.Dropdown>
             </Menu>
-        </Box>
+        </Box >
     );
 }

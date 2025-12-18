@@ -1,6 +1,6 @@
-import { Asset, AssetType as AssetTypeZod } from "@ts-drones/shared";
+import { Asset, AssetType as AssetTypeZod, Sound } from "@ts-drones/shared";
 import { AssetModel, AssetType as AssetTypeDB } from "../services/prisma.js";
-import { AssetName } from "../generated/prisma/index.js";
+import { AssetName, Sound as SoundModel } from "../services/prisma.js";
 
 const formatAssetType = (assetType: AssetTypeZod): AssetTypeDB => {
     switch (assetType) {
@@ -62,5 +62,18 @@ const toAssetDTO = (assetDb: AssetModel, createdAt: Date, type: AssetTypeDB, nam
     };
 }
 
+const formatSound = (sound: Sound): SoundModel => {
+    switch (sound) {
+        case "healing":
+            return SoundModel.HEALING;
+        case "emerveille":
+            return SoundModel.EMERVEILLE;
+        case "glossy":
+            return SoundModel.GLOSSY;
+        case "none":
+        default:
+            return SoundModel.NONE;
+    }
+}
 
-export { formatAssetType, formatAssetTypeReverse, formatAssetName, formatAssetNameReverse, toAssetDTO };
+export { formatAssetType, formatAssetTypeReverse, formatAssetName, formatAssetNameReverse, toAssetDTO, formatSound };

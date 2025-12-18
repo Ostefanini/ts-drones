@@ -1,12 +1,12 @@
 import * as z from "zod/v4";
-import { AssetCreateDTO, demoPlaystationModels, type Tag } from "@ts-drones/shared";
+import { AssetCreateDTO, demoPlaystationModels, Sound, soundSchema, type Tag } from "@ts-drones/shared";
 import { Request, Response, NextFunction } from "express";
 import sharp from "sharp";
+import _ from "lodash";
 
 import { prisma } from "./services/prisma.js";
-import _ from "lodash";
-import { formatAssetName } from "./helpers/formatters.js";
-import { AssetName } from "./generated/prisma/index.js";
+import { formatAssetName, formatSound } from "./helpers/formatters.js";
+import { AssetName } from "./services/prisma.js";
 
 // simple functions
 export function validateUniqueTags(tags: Tag[] | undefined): boolean {
@@ -76,6 +76,7 @@ const querySchema = z.object({
     assetTwo: z.enum(AssetName).optional(),
     assetThree: z.enum(AssetName).optional(),
     assetFour: z.enum(AssetName).optional(),
+    sound: soundSchema,
 }).refine((data) => {
     const assets = [data.assetOne, data.assetTwo, data.assetThree, data.assetFour].filter((a): a is AssetName => !!a);
     const uniqueAssets = new Set(assets);
@@ -95,23 +96,34 @@ export function validateCombinationQuery(req: Request, res: Response, next: Next
     res.locals.assetTwo = result.data.assetTwo;
     res.locals.assetThree = result.data.assetThree;
     res.locals.assetFour = result.data.assetFour;
+    res.locals.sound = result.data.sound;
     next();
 };
 
 export async function checkCombination(_req: Request, res: Response, next: NextFunction) {
     const { assetOne, assetTwo, assetThree, assetFour } = res.locals;
-
+    if (!res.locals.sound) {
+        res.status(400).json({ error: "Sound parameter is required" });
+        return;
+    }
+    const sound: Sound = res.locals.sound;
     const assetsToCheck: AssetName[] = [];
     let gap = false;
+    let gapError = false;
     [assetOne, assetTwo, assetThree, assetFour].forEach((assetName) => {
-        if (assetName && !gap) {
+        if (assetName && !gap && !gapError) {
             assetsToCheck.push(assetName);
-        } else if (!gap) {
+        } else if (!gap && !gapError) {
             gap = true;
         } else if (gap && assetName) {
-            res.status(400).json({ error: "Assets must be provided in order without gaps" });
+            gapError = true;
+            return;
         }
     })
+    if (gapError) {
+        res.status(400).json({ error: "Assets must be provided in order without gaps" });
+        return;
+    }
 
     try {
         // Verify assets exist in DB
@@ -121,7 +133,7 @@ export async function checkCombination(_req: Request, res: Response, next: NextF
                     in: assetsToCheck
                 }
             }
-        });
+        }) || [];
 
         if (existingAssets.length !== assetsToCheck.length) {
             res.status(404).json({ error: "One or more assets do not exist in the database" });
@@ -134,6 +146,7 @@ export async function checkCombination(_req: Request, res: Response, next: NextF
                 assetTwo: assetTwo ?? null,
                 assetThree: assetThree ?? null,
                 assetFour: assetFour ?? null,
+                sound: formatSound(sound),
             },
             include: {
                 foundBy: true

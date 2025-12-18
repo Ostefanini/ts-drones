@@ -1,5 +1,5 @@
 import * as z from "zod/v4";
-import { userNicknameSchema } from "./user";
+import { userNicknameSchema } from "./user.js";
 
 export const soundSchema = z.enum(["healing", "emerveille", "glossy", "none"]);
 

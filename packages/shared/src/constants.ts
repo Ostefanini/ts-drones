@@ -1,4 +1,4 @@
-import { AssetCreateDTO } from "./asset";
+import { AssetCreateDTO } from "./asset.js";
 
 const cross: AssetCreateDTO = {
     name: "cross",

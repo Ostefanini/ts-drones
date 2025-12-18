@@ -1,2 +1,5 @@
 uploads/*
 !uploads/.gitkeep
+pgadmin_data
+postgres_data
+src/generated

@@ -23,19 +23,11 @@ export const assetCreateTextFieldsSchema = assetSchema.omit({
   thumbnail: true,
 });
 
-// used when creating a new asset along with the thumbnail file
-export const assetCreateSchema = assetCreateTextFieldsSchema.extend({
-  thumbnail: z
-    .unknown()
-    .meta({
-      type: "string",
-      format: "binary",
-      description: "The asset thumbnail",
-    })
-})
-
-export const assetUpdateSchema = assetCreateSchema.partial();
+export const assetUpdateSchema = assetCreateTextFieldsSchema.partial();
+export const assetListSchema = assetSchema.array();
 
 export type Asset = z.infer<typeof assetSchema>;
+export type AssetType = z.infer<typeof assetTypeSchema>;
 export type AssetCreateDTO = z.infer<typeof assetCreateTextFieldsSchema>;
 export type AssetUpdateDTO = z.infer<typeof assetUpdateSchema>;
+export type AssetListDTO = z.infer<typeof assetListSchema>;

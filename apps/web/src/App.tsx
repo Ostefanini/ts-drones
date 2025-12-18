@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { type Asset, assetCreateSchema, demoPlaystationModels } from "@ts-drones/shared";
+import { type Asset, demoPlaystationModels } from "@ts-drones/shared";
 import '@mantine/core/styles.css';
 import { Center, Title, Button, Card, Image, Group, Text, Badge, SimpleGrid, Menu, Box, Indicator, Divider } from '@mantine/core';
 import { serialize } from 'object-to-formdata';
@@ -71,13 +71,7 @@ function App() {
                               ...model,
                             };
 
-                            const safeData = assetCreateSchema.safeParse(sendData);
-                            if (!safeData.success) {
-                              console.error(safeData.error);
-                              throw new Error("Invalid asset data");
-                            }
-
-                            const serializedData = serialize(safeData.data);
+                            const serializedData = serialize(sendData);
                             const { data } = await api.post<Asset>("/assets", serializedData);
                             setAssets((prev) => [...prev, data]);
                           })
@@ -123,31 +117,6 @@ function App() {
                     withBorder
                   >
                     <Card.Section style={{ position: "relative" }}>
-                      <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
-
-                          void (async () => {
-                            try {
-                              await api.delete(`/assets/${asset.id}`);
-                              setAssets(assets.filter(a => a.id !== asset.id));
-                            } catch (error) {
-                              console.error(error);
-                            }
-                          })();
-                        }}
-                        color="red"
-                        size="compact-xs"
-                        style={{
-                          position: "absolute",
-                          top: "0px",
-                          right: "0px",
-                          zIndex: 10,
-                          minWidth: "auto",
-                        }}
-                      >
-                        <IconTrash size={20} />
-                      </Button>
                       {asset.video ? (
                         <div
                           style={{

@@ -1,17 +1,34 @@
 import express from "express";
 import * as z from "zod/v4";
-import { type Asset, assetCreateTextFieldsSchema, assetUpdateSchema, demoPlaystationModels } from "@ts-drones/shared";
+import {
+    type Asset,
+    assetCreateTextFieldsSchema,
+    assetUpdateSchema, AssetListDTO
+} from "@ts-drones/shared";
 import _ from "lodash";
 
-import { assets, thumbnails } from "./services/db.js";
-import { checkThumbnail, validateAssetId, validateUniqueTags } from "./validators.js";
+import { thumbnails } from "./services/db.js";
+import {
+    checkProductionAssets, checkThumbnail,
+    validateAssetId, validateUniqueTags
+} from "./validators.js";
 import { upload } from "./services/multer.js";
+import { prisma } from "./services/prisma.js";
+import { formatAssetType, toAssetDTO } from "./helpers/formatters.js";
 
 const assetsRouter = express.Router();
 
-assetsRouter.get("/", (_req, res) => {
-    res.json(assets);
-});
+assetsRouter.get("/",
+    async (_req, res) => {
+        const assets = await prisma.asset.findMany();
+
+        const formattedAssets: AssetListDTO = assets.map((asset) => toAssetDTO(
+            asset,
+            asset.createdAt,
+            asset.type,
+        ));
+        res.json(formattedAssets);
+    });
 
 assetsRouter.post("/",
     upload.single("thumbnail"),
@@ -22,60 +39,28 @@ assetsRouter.post("/",
             durationSec: Number(req.body.durationSec),
             nbUav: Number(req.body.nbUav),
         };
-        req.body = normalizedBody;
         const parsed = assetCreateTextFieldsSchema.safeParse(normalizedBody);
         if (!parsed.success) {
             return res.status(400).json({ error: "validation", issues: parsed.error.issues });
-        } else if (!validateUniqueTags(parsed.data)) {
+        } else if (!validateUniqueTags(parsed.data.tags)) {
             return res.status(400).json({ error: "validation", message: "Asset tags must be unique" });
         }
 
-        if (process.env.NODE_ENV === "production") {
-            let isAllowed = false;
-            Object.values(demoPlaystationModels).forEach(validModel => {
-                if (_.isEqual(parsed.data, validModel)
-                    && assets.find(({ name }) => name === parsed.data.name) === undefined) {
-                    isAllowed = true;
-                }
-            });
-            if (!isAllowed) {
-                return res.status(400).json({ error: "validation", message: "In production, only demo assets are allowed" });
+        const allowed = await checkProductionAssets(parsed.data);
+        if (!allowed) {
+            return res.status(400).json({ error: "validation", message: "In production, only demo assets are allowed" });
+        }
+
+        const assetDb = await prisma.asset.create({
+            data: {
+                ...parsed.data,
+                type: formatAssetType(parsed.data.type),
             }
-        }
+        })
+        thumbnails.set(assetDb.thumbnail, res.locals.buffer);
 
-        const imgUuid = crypto.randomUUID();
-        thumbnails.set(imgUuid, res.locals.buffer);
-        const now = new Date().toISOString();
-        const newAsset: Asset = {
-            id: crypto.randomUUID(),
-            createdAt: now,
-            thumbnail: imgUuid,
-            ...parsed.data,
-        };
-        assets.push(newAsset);
-
-        res.status(201).json(newAsset);
-    });
-
-assetsRouter.patch("/:id",
-    validateAssetId,
-    (req, res) => {
-        const parsed = assetUpdateSchema.safeParse(req.body);
-        if (!parsed.success) {
-            return res.status(400).json({ error: "validation", issues: parsed.error.issues });
-        }
-
-        if (!validateUniqueTags(parsed.data as Asset)) {
-            return res.status(400).json({ error: "validation", message: "Asset tags must be unique" });
-        }
-
-        const updatedAsset = {
-            ...assets[res.locals.assetIndex],
-            ...req.body,
-        };
-        assets[res.locals.assetIndex] = updatedAsset;
-
-        res.json(updatedAsset);
+        const asset: Asset = toAssetDTO(assetDb, assetDb.createdAt, assetDb.type);
+        res.status(201).json(asset);
     });
 
 assetsRouter.get("/thumbnail/:id",
@@ -92,11 +77,37 @@ assetsRouter.get("/thumbnail/:id",
         res.send(thumbnail);
     });
 
-assetsRouter.delete("/:id",
-    validateAssetId,
-    (_req, res) => {
-        assets.splice(res.locals.assetIndex, 1);
-        res.status(204).end();
-    });
+if (process.env.NODE_ENV !== "production") {
+    assetsRouter.put("/:id",
+        validateAssetId,
+        async (req, res) => {
+            const parsed = assetUpdateSchema.safeParse(req.body);
+            if (!parsed.success) {
+                return res.status(400).json({ error: "validation", issues: parsed.error.issues });
+            }
+            if (!validateUniqueTags(parsed.data.tags)) {
+                return res.status(400).json({ error: "validation", message: "Asset tags must be unique" });
+            }
+
+            const { type, ...rest } = parsed.data;
+            const assetDb = await prisma.asset.update({
+                where: { id: req.params.id },
+                data: {
+                    ...rest,
+                    ...(type !== undefined ? { type: formatAssetType(type) } : {})
+                },
+            })
+
+            const updatedAsset: Asset = toAssetDTO(assetDb, assetDb.createdAt, assetDb.type);
+            res.json(updatedAsset);
+        });
+
+    assetsRouter.delete("/:id",
+        validateAssetId,
+        async (_req, res) => {
+            await prisma.asset.delete({ where: { id: _req.params.id } });
+            res.status(204).end();
+        });
+}
 
 export { assetsRouter }

@@ -1,26 +1,28 @@
-import { describe, expect, test, beforeEach } from '@jest/globals';
+import { describe, expect, test } from '@jest/globals';
 import request from "supertest";
 import fs from "fs";
 import _ from "lodash";
 
+import { prismaMock } from "./setup/prisma.mock.js";
 import app from "../src/index";
-import { assets } from "../src/services/db.js";
-import { assetPayload, fullAsset } from "./data/assets.js";
+import { assetPayload, fullAsset, fullAssetFromDb } from "./data/assets.js";
+import { prisma } from '../src/services/prisma.js';
 
 describe('Assets endpoints', () => {
-    beforeEach(() => {
-        assets.length = 0;
-    });
-
     test('GET /assets responds with 200 and json array', async () => {
+        prismaMock.asset.findMany.calledWith().mockResolvedValueOnce([]);
+
         const response = await request(app).get('/assets');
         expect(response.status).toBe(200);
+
         const data = response.body;
         expect(Array.isArray(data)).toBe(true);
         expect(data.length).toEqual(0);
     });
 
     test('POST /assets with valid data responds with 201 and created asset', async () => {
+        prismaMock.asset.create.calledWith(expect.any(Object) as any).mockResolvedValueOnce(fullAssetFromDb);
+
         const thumbnail = fs.readFileSync("tests/files/cross.png")
 
         const response = await request(app)
@@ -42,16 +44,20 @@ describe('Assets endpoints', () => {
             .toEqual(assetPayload);
     });
 
-    test('PATCH /assets/:id with valid data responds with 200 and updated asset', async () => {
-        assets.push(fullAsset);
-
+    test('PUT /assets/:id with valid data responds with 200 and updated asset', async () => {
+        prismaMock.asset.findUnique.calledWith(expect.any(Object) as any).mockResolvedValueOnce(fullAssetFromDb);
         const updateData = {
             name: "Updated Asset",
             description: "Updated description"
         };
 
+        prismaMock.asset.update.calledWith(expect.any(Object) as any).mockResolvedValueOnce({
+            ...fullAssetFromDb,
+            ...updateData
+        } as any);
+
         const response = await request(app)
-            .patch(`/assets/${fullAsset.id}`)
+            .put(`/assets/${fullAsset.id}`)
             .send(updateData);
 
         expect(response.status).toBe(200);
@@ -62,6 +68,7 @@ describe('Assets endpoints', () => {
     });
 
     test('GET /assets/thumbnail/:id responds with 200 and image buffer', async () => {
+        prismaMock.asset.create.calledWith(expect.any(Object) as any).mockResolvedValueOnce(fullAssetFromDb);
         const thumbnail = fs.readFileSync("tests/files/cross.png")
 
         const postResponse = await request(app)
@@ -87,13 +94,13 @@ describe('Assets endpoints', () => {
     });
 
     test('DELETE /assets/:id responds with 204 and removes the asset', async () => {
-        assets.push(fullAsset);
+        prismaMock.asset.findUnique.calledWith(expect.any(Object) as any).mockResolvedValueOnce(fullAssetFromDb);
+        prismaMock.asset.delete.calledWith(expect.any(Object) as any).mockResolvedValueOnce(fullAssetFromDb);
 
         const response = await request(app)
             .delete(`/assets/${fullAsset.id}`);
 
         expect(response.status).toBe(204);
-        expect(assets.length).toBe(0);
     });
 
     describe('Invalid requests', () => {
@@ -147,41 +154,43 @@ describe('Assets endpoints', () => {
             expect(response.body).toHaveProperty('message', 'Asset tags must be unique');
         });
 
-        test('PATCH /assets/:id with invalid id responds with 400', async () => {
+        test('PUT /assets/:id with invalid id responds with 400', async () => {
+            prismaMock.asset.findUnique.calledWith(expect.any(Object) as any).mockResolvedValueOnce(fullAssetFromDb);
             const updateData = {
                 name: "Updated Asset"
             };
 
             const response = await request(app)
-                .patch('/assets/invalid-id')
+                .put('/assets/invalid-id')
                 .send(updateData);
 
             expect(response.status).toBe(400);
             expect(response.body).toHaveProperty('error', 'invalid id');
         });
 
-        test('PATCH /assets/:id with non-existent id responds with 404', async () => {
+        test('PUT /assets/:id with non-existent id responds with 404', async () => {
+            prismaMock.asset.update.calledWith(expect.any(Object) as any).mockRejectedValue({ code: 'P2025' });
+
             const updateData = {
                 name: "Updated Asset"
             };
 
             const response = await request(app)
-                .patch(`/assets/${crypto.randomUUID()}`)
+                .put(`/assets/${crypto.randomUUID()}`)
                 .send(updateData);
 
             expect(response.status).toBe(404);
             expect(response.body).toHaveProperty('error', 'not found');
         });
 
-        test('PATCH /assets/:id with duplicate tags responds with 400', async () => {
-            assets.push(fullAsset);
-
+        test('PUT /assets/:id with duplicate tags responds with 400', async () => {
+            prismaMock.asset.findUnique.calledWith(expect.any(Object) as any).mockResolvedValueOnce(fullAssetFromDb);
             const updateData = {
                 tags: ["duplicate", "duplicate"]
             };
 
             const response = await request(app)
-                .patch(`/assets/${fullAsset.id}`)
+                .put(`/assets/${fullAsset.id}`)
                 .send(updateData);
 
             expect(response.status).toBe(400);
@@ -214,6 +223,8 @@ describe('Assets endpoints', () => {
         });
 
         test('DELETE /assets/:id with non-existent id responds with 404', async () => {
+            prismaMock.asset.delete.calledWith(expect.any(Object) as any).mockRejectedValue({ code: 'P2025' });
+
             const response = await request(app)
                 .delete(`/assets/${crypto.randomUUID()}`);
 

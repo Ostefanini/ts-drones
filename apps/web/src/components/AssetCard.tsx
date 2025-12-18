@@ -1,14 +1,13 @@
 import { type Asset } from "@ts-drones/shared";
 import { Card, Image, Group, Text, Badge, Button, Title } from '@mantine/core';
-import { IconDrone, IconHourglassEmpty, IconPlaylistAdd, IconTrash } from "@tabler/icons-react";
+import { IconDrone, IconHourglassEmpty, IconPlaylistAdd } from "@tabler/icons-react";
 
 interface AssetCardProps {
     asset: Asset;
-    onDelete: (assetId: string) => void;
     onAddToPlaylist: (asset: Asset) => void;
 }
 
-export function AssetCard({ asset, onDelete, onAddToPlaylist }: AssetCardProps) {
+export function AssetCard({ asset, onAddToPlaylist }: AssetCardProps) {
     return (
         <Card
             key={asset.id}
@@ -31,23 +30,6 @@ export function AssetCard({ asset, onDelete, onAddToPlaylist }: AssetCardProps) 
             withBorder
         >
             <Card.Section style={{ position: "relative" }}>
-                <Button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(asset.id);
-                    }}
-                    color="red"
-                    size="compact-xs"
-                    style={{
-                        position: "absolute",
-                        top: "0px",
-                        right: "0px",
-                        zIndex: 10,
-                        minWidth: "auto",
-                    }}
-                >
-                    <IconTrash size={20} />
-                </Button>
                 {asset.video ? (
                     <div
                         style={{

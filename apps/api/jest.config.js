@@ -19,4 +19,6 @@ export default {
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
+
+  setupFilesAfterEnv: ["<rootDir>/tests/setup/prisma.mock.ts"],
 };

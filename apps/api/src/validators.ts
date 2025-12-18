@@ -1,29 +1,31 @@
 import * as z from "zod/v4";
-import { AssetCreateDTO } from "@ts-drones/shared";
+import { AssetCreateDTO, demoPlaystationModels, type Tag } from "@ts-drones/shared";
 import { Request, Response, NextFunction } from "express";
 import sharp from "sharp";
 
-import { assets } from "./services/db.js";
+import { prisma } from "./services/prisma.js";
+import _ from "lodash";
 
 // simple functions
-export function validateUniqueTags(toValidate: AssetCreateDTO): boolean {
-    if (!toValidate.tags) {
+export function validateUniqueTags(tags: Tag[] | undefined): boolean {
+    if (!tags) {
         return true;
     }
-    const tagsSet = new Set(toValidate.tags);
-    return tagsSet.size === toValidate.tags.length;
+    const tagsSet = new Set(tags);
+    return tagsSet.size === tags.length;
 }
 
 // as express middlewares
-export function validateAssetId(req: Request, res: Response, next: NextFunction) {
+export async function validateAssetId(req: Request, res: Response, next: NextFunction) {
     const id = z.uuid().safeParse(req.params.id);
     if (!id.success) {
         return res.status(400).json({ error: "invalid id" });
     }
-    res.locals.assetIndex = assets.findIndex(a => a.id === id.data);
-    if (res.locals.assetIndex === -1) {
+    const existingAsset = await prisma.asset.findUnique({ where: { id: id.data } });
+    if (!existingAsset) {
         return res.status(404).json({ error: "not found" });
     }
+    res.locals.asset = existingAsset;
     next();
 }
 
@@ -52,4 +54,17 @@ export async function checkThumbnail(req: Request, res: Response, next: NextFunc
     catch (_err) {
         return res.status(400).json({ error: "validation", message: "Invalid thumbnail image" });
     };
+}
+
+export async function checkProductionAssets(data: AssetCreateDTO): Promise<boolean> {
+    if (process.env.NODE_ENV !== "production") return true;
+
+    const exists = await prisma.asset.findFirst({ where: { name: data.name } });
+
+    return (
+        exists === null &&
+        Object.values(demoPlaystationModels).some(validModel =>
+            _.isEqual(data, validModel)
+        )
+    );
 }

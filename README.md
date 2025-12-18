@@ -24,8 +24,8 @@ Node + Express + Typescript + Zod + Prisma + PostgreSQL + supertest
 
 ## Infra
 
-CI/CD + Dockerfiles + Docker-compose
+CI/CD + Docker files/compose (hardened images)
 
 # Hire me
 
-oscar[dot]stefanini1[at]@mail.com
+oscar[dot]stefanini1[at]@gmail.com

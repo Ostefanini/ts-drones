@@ -1,4 +1,5 @@
 import { type Asset } from "@ts-drones/shared";
+import { formatAssetType } from "../../src/helpers/formatters.js";
 
 const assetPayload = {
     name: "Asset #1",
@@ -16,8 +17,14 @@ const assetPayload = {
 const fullAsset: Asset = {
     "id": "123e4567-e89b-12d3-a456-426614174000",
     "createdAt": new Date().toISOString(),
-    "thumbnail": "thumbnail-id",
-    ...assetPayload
+    "thumbnail": "123e4567-e89b-12d3-a456-426614174001",
+    ...assetPayload,
 };
 
-export { assetPayload, fullAsset };
+const fullAssetFromDb = {
+    ...fullAsset,
+    type: formatAssetType(fullAsset.type),
+    createdAt: new Date(fullAsset.createdAt),
+};
+
+export { assetPayload, fullAsset, fullAssetFromDb };

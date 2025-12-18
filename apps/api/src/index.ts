@@ -1,7 +1,9 @@
+import 'dotenv/config.js';
 import express from "express";
 import cors from "cors";
-import { tagsRouter } from "./tags.js";
+
 import { assetsRouter } from "./assets.js";
+import { prisma } from "./services/prisma.js";
 
 const app = express();
 app.use((req, res, next) => {
@@ -19,23 +21,32 @@ app.use((req, _res, next) => {
     next();
 })
 
-app.use("/tags", tagsRouter);
-
 app.use("/assets", assetsRouter);
 
 if (process.env.NODE_ENV !== "test") {
     const PORT = 4000;
-    const server = app.listen(PORT, () => {
-        console.log(`API http://localhost:${PORT}`);
-    });
 
-    function shutdown(signal: string) {
-        console.log(`received ${signal}`);
-        server.close(() => {
-            process.exit(0);
+    prisma.$connect()
+        .then(() => prisma.$queryRaw`SELECT 1`)
+        .then(() => {
+            console.log("Connected to database");
+            const server = app.listen(PORT, () => {
+                console.log(`API http://localhost:${PORT}`);
+            });
+
+            function shutdown(signal: string) {
+                console.log(`received ${signal}`);
+                server.close(() => {
+                    prisma.$disconnect().then(() => {
+                        process.exit(0);
+                    });
+                });
+            }
+            process.on("SIGTERM", shutdown);
+            process.on("SIGINT", shutdown);
+        }).catch((e) => {
+            console.error("Failed to connect to database", e);
+            process.exit(1);
         });
-    }
-    process.on("SIGTERM", shutdown);
-    process.on("SIGINT", shutdown);
 }
 export default app

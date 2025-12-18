@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+
+  runtime                = "nodejs"
+  moduleFormat           = "esm"
+  generatedFileExtension = "js"
+  importFileExtension    = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AssetType {
+  TWO_D
+  THREE_D
+  SCRIPT
+}
+
+enum AssetName {
+  TRIANGLE
+  SQUARE
+  CIRCLE
+  CROSS
+}
+
+model User {
+  id           String        @id @default(uuid())
+  nickname     String        @unique
+  combinations Combination[]
+}
+
+model Asset {
+  id          String    @id @default(uuid())
+  name        String
+  thumbnail   String    @default(uuid())
+  video       String?
+  description String
+  type        AssetType
+  durationSec Int?
+  nbUav       Int?
+  createdAt   DateTime  @default(now())
+  tags        String[]
+}
+
+// Unique combination of assets found by a user, not related to actual assets
+model Combination {
+  id         String     @id @default(uuid())
+  assetOne   AssetName
+  assetTwo   AssetName?
+  assetThree AssetName?
+  assetFour  AssetName?
+  foundAt    DateTime   @default(now())
+  foundBy    User       @relation(fields: [foundById], references: [id])
+  foundById  String
+
+  @@unique([assetOne, assetTwo, assetThree, assetFour, foundById])
+}

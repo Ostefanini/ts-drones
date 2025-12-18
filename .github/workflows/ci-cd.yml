@@ -94,6 +94,8 @@ jobs:
           context: ${{ matrix.image.context }}
           file: ${{ matrix.image.dockerfile }}
           target: ${{ matrix.image.target }}
+          build-args: |
+            DATABASE_URL="postgresql://user:pass@localhost:5432/db?schema=public"
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.REPO }}/${{ matrix.image.name }}:latest

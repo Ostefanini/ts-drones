@@ -13,7 +13,7 @@ import {
 } from "./validators.js";
 import { upload } from "./services/multer.js";
 import { prisma } from "./services/prisma.js";
-import { formatAssetType, toAssetDTO } from "./helpers/formatters.js";
+import { formatAssetName, formatAssetType, toAssetDTO } from "./helpers/formatters.js";
 
 const assetsRouter = express.Router();
 
@@ -25,6 +25,7 @@ assetsRouter.get("/",
             asset,
             asset.createdAt,
             asset.type,
+            asset.name
         ));
         res.json(formattedAssets);
     });
@@ -54,11 +55,12 @@ assetsRouter.post("/",
             data: {
                 ...parsed.data,
                 type: formatAssetType(parsed.data.type),
+                name: formatAssetName(parsed.data.name),
             }
         })
         thumbnails.set(assetDb.thumbnail, res.locals.buffer);
 
-        const asset: Asset = toAssetDTO(assetDb, assetDb.createdAt, assetDb.type);
+        const asset: Asset = toAssetDTO(assetDb, assetDb.createdAt, assetDb.type, assetDb.name);
         res.status(201).json(asset);
     });
 
@@ -88,16 +90,17 @@ if (process.env.NODE_ENV !== "production") {
                 return res.status(400).json({ error: "validation", message: "Asset tags must be unique" });
             }
 
-            const { type, ...rest } = parsed.data;
+            const { type, name, ...rest } = parsed.data;
             const assetDb = await prisma.asset.update({
                 where: { id: req.params.id },
                 data: {
                     ...rest,
-                    ...(type !== undefined ? { type: formatAssetType(type) } : {})
+                    ...(type !== undefined ? { type: formatAssetType(type) } : {}),
+                    ...(name !== undefined ? { name: formatAssetName(name) } : {})
                 },
             })
 
-            const updatedAsset: Asset = toAssetDTO(assetDb, assetDb.createdAt, assetDb.type);
+            const updatedAsset: Asset = toAssetDTO(assetDb, assetDb.createdAt, assetDb.type, assetDb.name);
             res.json(updatedAsset);
         });
 

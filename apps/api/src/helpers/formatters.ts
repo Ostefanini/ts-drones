@@ -1,5 +1,6 @@
 import { Asset, AssetType as AssetTypeZod } from "@ts-drones/shared";
 import { AssetModel, AssetType as AssetTypeDB } from "../services/prisma.js";
+import { AssetName } from "../generated/prisma/index.js";
 
 const formatAssetType = (assetType: AssetTypeZod): AssetTypeDB => {
     switch (assetType) {
@@ -24,13 +25,42 @@ const formatAssetTypeReverse = (assetType: AssetTypeDB): AssetTypeZod => {
     }
 }
 
-const toAssetDTO = (assetDb: AssetModel, createdAt: Date, type: AssetTypeDB): Asset => {
+const formatAssetName = (name: string): AssetName => {
+    switch (name) {
+        case "triangle":
+            return AssetName.TRIANGLE;
+        case "square":
+            return AssetName.SQUARE;
+        case "circle":
+            return AssetName.CIRCLE;
+        case "cross":
+        default:
+            return AssetName.CROSS;
+    }
+}
+
+const formatAssetNameReverse = (name: AssetName): string => {
+    switch (name) {
+        case AssetName.TRIANGLE:
+            return "triangle";
+        case AssetName.SQUARE:
+            return "square";
+        case AssetName.CIRCLE:
+            return "circle";
+        case AssetName.CROSS:
+        default:
+            return "cross";
+    }
+}
+
+const toAssetDTO = (assetDb: AssetModel, createdAt: Date, type: AssetTypeDB, name: AssetName): Asset => {
     return {
         ...assetDb,
+        name: formatAssetNameReverse(name),
         createdAt: createdAt.toISOString(),
         type: formatAssetTypeReverse(type),
     };
 }
 
 
-export { formatAssetType, formatAssetTypeReverse, toAssetDTO };
+export { formatAssetType, formatAssetTypeReverse, formatAssetName, formatAssetNameReverse, toAssetDTO };

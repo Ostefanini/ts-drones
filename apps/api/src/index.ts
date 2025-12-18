@@ -2,8 +2,10 @@ import 'dotenv/config.js';
 import express from "express";
 import cors from "cors";
 
-import { assetsRouter } from "./assets.js";
 import { prisma } from "./services/prisma.js";
+import { assetsRouter } from "./assets.js";
+import { combinationsRouter } from "./combinations.js";
+import { userRouter } from "./user.js";
 
 const app = express();
 app.use((req, res, next) => {
@@ -21,7 +23,13 @@ app.use((req, _res, next) => {
     next();
 })
 
+app.get('/ping', (_req, res) => {
+    res.send('pong');
+});
+
 app.use("/assets", assetsRouter);
+app.use("/combinations", combinationsRouter);
+app.use("/users", userRouter);
 
 if (process.env.NODE_ENV !== "test") {
     const PORT = 4000;

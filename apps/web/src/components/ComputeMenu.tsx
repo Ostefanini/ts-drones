@@ -1,6 +1,7 @@
 import { type Asset } from "@ts-drones/shared";
 import { Box, Button, Indicator, Menu, Text } from '@mantine/core';
 import { IconCloudComputing, IconPlaylist, IconTrash } from "@tabler/icons-react";
+import { emojiBlasts } from "emoji-blast";
 
 interface ComputeMenuProps {
     playlist: Asset[];
@@ -88,7 +89,9 @@ export function ComputeMenu({ playlist, onRemoveFromPlaylist, onCompute }: Compu
                                 background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
                             }}
                             fullWidth
-                            onClick={onCompute}
+                            onClick={() => {
+                                onCompute();
+                            }}
                         >
                             <Text c="white">
                                 <IconCloudComputing

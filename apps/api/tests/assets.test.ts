@@ -6,6 +6,7 @@ import _ from "lodash";
 import { prismaMock } from "./setup/prisma.mock.js";
 import app from "../src/index";
 import { assetPayload, fullAsset, fullAssetFromDb } from "./data/assets.js";
+import { formatAssetName } from "../src/helpers/formatters.js";
 
 describe('Assets endpoints', () => {
     test('GET /assets responds with 200 and json array', async () => {
@@ -46,14 +47,15 @@ describe('Assets endpoints', () => {
     test('PUT /assets/:id with valid data responds with 200 and updated asset', async () => {
         prismaMock.asset.findUnique.calledWith(expect.any(Object) as any).mockResolvedValueOnce(fullAssetFromDb);
         const updateData = {
-            name: "Updated Asset",
+            name: "circle",
             description: "Updated description"
         };
 
         prismaMock.asset.update.calledWith(expect.any(Object) as any).mockResolvedValueOnce({
             ...fullAssetFromDb,
-            ...updateData
-        } as any);
+            ...updateData,
+            name: formatAssetName(updateData.name)
+        });
 
         const response = await request(app)
             .put(`/assets/${fullAsset.id}`)

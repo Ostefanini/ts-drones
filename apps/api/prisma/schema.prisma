@@ -39,7 +39,7 @@ model User {
 
 model Asset {
   id          String    @id @default(uuid())
-  name        String
+  name        AssetName
   thumbnail   String    @default(uuid())
   video       String?
   description String

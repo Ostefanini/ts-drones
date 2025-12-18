@@ -13,6 +13,7 @@
         "test": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles"
     },
     "dependencies": {
+        "@idrisay/profanity-check": "^1.6.0",
         "@prisma/adapter-pg": "^7.1.0",
         "@prisma/client": "^7.1.0",
         "@prisma/client-runtime-utils": "^7.1.0",

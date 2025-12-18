@@ -5,6 +5,8 @@ import sharp from "sharp";
 
 import { prisma } from "./services/prisma.js";
 import _ from "lodash";
+import { formatAssetName } from "./helpers/formatters.js";
+import { AssetName } from "./generated/prisma/index.js";
 
 // simple functions
 export function validateUniqueTags(tags: Tag[] | undefined): boolean {
@@ -59,7 +61,7 @@ export async function checkThumbnail(req: Request, res: Response, next: NextFunc
 export async function checkProductionAssets(data: AssetCreateDTO): Promise<boolean> {
     if (process.env.NODE_ENV !== "production") return true;
 
-    const exists = await prisma.asset.findFirst({ where: { name: data.name } });
+    const exists = await prisma.asset.findFirst({ where: { name: formatAssetName(data.name) } });
 
     return (
         exists === null &&
@@ -67,4 +69,81 @@ export async function checkProductionAssets(data: AssetCreateDTO): Promise<boole
             _.isEqual(data, validModel)
         )
     );
+}
+
+const querySchema = z.object({
+    assetOne: z.enum(AssetName),
+    assetTwo: z.enum(AssetName).optional(),
+    assetThree: z.enum(AssetName).optional(),
+    assetFour: z.enum(AssetName).optional(),
+}).refine((data) => {
+    const assets = [data.assetOne, data.assetTwo, data.assetThree, data.assetFour].filter((a): a is AssetName => !!a);
+    const uniqueAssets = new Set(assets);
+    return uniqueAssets.size === assets.length;
+}, {
+    message: "Assets must be unique",
+    path: ["assetOne"],
+});
+
+export function validateCombinationQuery(req: Request, res: Response, next: NextFunction) {
+    const result = querySchema.safeParse(req.query);
+    if (!result.success) {
+        res.status(400).json({ error: result.error.issues });
+        return;
+    }
+    res.locals.assetOne = result.data.assetOne;
+    res.locals.assetTwo = result.data.assetTwo;
+    res.locals.assetThree = result.data.assetThree;
+    res.locals.assetFour = result.data.assetFour;
+    next();
+};
+
+export async function checkCombination(_req: Request, res: Response, next: NextFunction) {
+    const { assetOne, assetTwo, assetThree, assetFour } = res.locals;
+
+    const assetsToCheck: AssetName[] = [];
+    let gap = false;
+    [assetOne, assetTwo, assetThree, assetFour].forEach((assetName) => {
+        if (assetName && !gap) {
+            assetsToCheck.push(assetName);
+        } else if (!gap) {
+            gap = true;
+        } else if (gap && assetName) {
+            res.status(400).json({ error: "Assets must be provided in order without gaps" });
+        }
+    })
+
+    try {
+        // Verify assets exist in DB
+        const existingAssets = await prisma.asset.findMany({
+            where: {
+                name: {
+                    in: assetsToCheck
+                }
+            }
+        });
+
+        if (existingAssets.length !== assetsToCheck.length) {
+            res.status(404).json({ error: "One or more assets do not exist in the database" });
+            return;
+        }
+
+        res.locals.combination = await prisma.combination.findFirst({
+            where: {
+                assetOne: assetOne,
+                assetTwo: assetTwo ?? null,
+                assetThree: assetThree ?? null,
+                assetFour: assetFour ?? null,
+            },
+            include: {
+                foundBy: true
+            }
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.sendStatus(500);
+        return;
+    }
+    next();
 }

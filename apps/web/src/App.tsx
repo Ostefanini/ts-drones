@@ -1,13 +1,23 @@
 import { useEffect, useState } from "react";
 import { type Asset, demoPlaystationModels } from "@ts-drones/shared";
 import '@mantine/core/styles.css';
-import { Center, Title, Button, Card, Image, Group, Text, Badge, SimpleGrid, Menu, Box, Indicator, Divider } from '@mantine/core';
+import {
+  Center, Title, Button,
+  Card, Image, Group, Text,
+  Badge, SimpleGrid, Divider,
+  Combobox, useCombobox, InputBase
+} from '@mantine/core';
 import { serialize } from 'object-to-formdata';
-import { IconCloudComputing, IconDatabase, IconDrone, IconHourglassEmpty, IconPlaylist, IconPlaylistAdd, IconTrash } from "@tabler/icons-react";
+import {
+  IconDatabase, IconDrone, IconHourglassEmpty, IconPlaylistAdd
+} from "@tabler/icons-react";
 import GithubCorner from 'react-github-corner';
+import { emojiBlasts } from "emoji-blast";
 
 import api from "./services/api.js";
 import showsConst from "./playstation_shows.json";
+import { ComputeMenu } from "./components/ComputeMenu";
+import { computeAssetQueryParams } from "./helpers.js";
 
 
 function App() {
@@ -16,20 +26,41 @@ function App() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [playlist, setPlaylist] = useState<Asset[]>([]);
   const [showVideo, setShowVideo] = useState<string | null>(null);
+  const [users, setUsers] = useState<any[]>([]);
+  const [isNew, setIsNew] = useState<boolean | null>(null);
+  const [foundBy, setFoundBy] = useState<string | null>(null);
+
+  const combobox = useCombobox({
+    onDropdownClose: () => combobox.resetSelectedOption(),
+  });
+  const exactOptionMatch = users.some((item) => item === foundBy);
+  const filteredOptions = exactOptionMatch
+    ? users
+    : users.filter((item) => item.toLowerCase().includes(foundBy?.toLowerCase().trim()));
+  const options = filteredOptions.map((item) => (
+    <Combobox.Option value={item} key={item}>
+      {item}
+    </Combobox.Option>
+  ));
 
   useEffect(() => {
     let cancelled = false;
 
     (async () => {
-      const { data } = await api.get<Asset[]>("/assets");
+      const [{ data: assetsData }, { data: usersData }] = await Promise.all([
+        api.get<Asset[]>("/assets"),
+        api.get<string[]>("/users")
+      ]);
+
       if (!cancelled) {
-        setAssets(data);
+        setAssets(assetsData);
+        setUsers(usersData);
         setLoading(false);
       }
     })().catch((e) => {
       if (!cancelled) {
         setLoading(false);
-        console.error("Failed to load assets", e);
+        console.error("Failed to load data", e);
       }
     });
 
@@ -37,6 +68,16 @@ function App() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (isNew === null) return;
+    const emojis = isNew ? "✅🎉🚀" : "❌😢";
+    const { cancel } = emojiBlasts({
+      interval: 40,
+      emojis: [emojis],
+    });
+    setTimeout(cancel, 1000);
+  }, [isNew])
 
 
   if (loading) return <div>Loading…</div>;
@@ -51,6 +92,7 @@ function App() {
       >
         <Title ta='center' order={1}>TS - Drones</Title>
         <Title ta="center" order={3}>A minimalist version of the drawn lights app, in typescript</Title>
+        <Text fs="italic" ta="center">And try to discover new combinations...</Text>
         <div style={{ marginTop: "24px" }}>
           {assets.length === 0 && playlist.length === 0 && (
             <div>
@@ -182,123 +224,108 @@ function App() {
           }
         </div>
       </div >
-      {playlist.length > 0 && (
-        <Box style={{ position: "fixed", bottom: 24, right: 24, zIndex: 1000 }}>
-          <Menu
-            transitionProps={{ transition: 'pop-top-right' }}
-            width={220}
-            withinPortal
-            radius="md"
-          >
-            <Menu.Target
-            >
-              <Indicator inline label={playlist.length} size={24}>
-                <Button
-                  size="xl"
-                  p={20}
-                  radius="xl"
-                  styles={{
-                    root: {
-                      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                      boxShadow: "0 8px 16px rgba(102, 126, 234, 0.4)",
-                      border: "3px solid rgba(255, 255, 255, 0.3)",
-                      '&:hover': {
-                        background: "linear-gradient(135deg, #7c8ef5 0%, #8b5bb5 100%)",
-                        boxShadow: "0 12px 24px rgba(102, 126, 234, 0.5)",
-                        border: "1px solid rgba(255, 255, 255, 0.5)",
-                      }
-                    }
-                  }}
-                >
-                  <IconPlaylist size={20} />
-                </Button>
-              </Indicator>
-            </Menu.Target>
-            <Menu.Dropdown
-              style={{
-                backgroundColor: "#663399",
-                border: "2px solid #667eea",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-              }}
-            >
-              {playlist.map((asset) => (
-                <Menu.Item
-                  key={asset.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                  style={{ borderBottom: '1px solid white' }}
-                  rightSection={
-                    <IconTrash
-                      size={16}
-                      color={"red"}
-                      stroke={1.5}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setAssets([...assets, asset]);
-                        setPlaylist(playlist.filter(a => a.id !== asset.id));
-                      }}
-                      style={{ cursor: "pointer" }}
-                    />
-                  }
-                >
-                  <Text c="white">
-                    {asset.name}
-                  </Text>
-                </Menu.Item>
-              ))}
-              <Menu.Item
-                key={"compute"}
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-                style={{
-                  marginTop: '8px',
-                }}
-              >
-                <Button
-                  style={{
-                    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                  }}
-                  fullWidth
-                  onClick={() => {
-                    const combinationName = playlist.map(({ name }) => name).join(",");;
-                    const fullNameNotVr = `source_0_${combinationName}_glossy.mp4`
-                    const linkNotVr = showsConst.find((show) => show.isVr === false && show.fullName === fullNameNotVr)?.link;
-                    if (linkNotVr) {
-                      setShowVideo(linkNotVr);
-                      setTimeout(() => {
-                        const videoFrame = document.getElementById("videoFrame");
-                        if (videoFrame) {
-                          videoFrame.scrollIntoView({ behavior: "smooth" });
-                        }
-                      }, 100);
-                    }
-                  }
-                  }
-                >
-                  <Text c="white">
+      <ComputeMenu
+        playlist={playlist}
+        onRemoveFromPlaylist={(asset) => {
+          setAssets([...assets, asset]);
+          setPlaylist(playlist.filter((a) => a.id !== asset.id));
+        }}
+        onCompute={() => {
 
-                    <IconCloudComputing
-                      size={16}
-                      stroke={1.5}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        console.log("Delete clicked");
-                      }}
-                      style={{ cursor: "pointer", marginRight: "8px" }}
-                    />Compute
-                  </Text>
-                </Button>
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-        </Box>
-      )}
+          void (async () => {
+            try {
+              const { data } = await api.get(`/combinations/is-found?${computeAssetQueryParams(playlist)}`);
+              if (data.exist && data.foundBy) {
+                setFoundBy(data.foundBy);
+              }
+              setIsNew(!data.exist);
+
+              const combinationName = playlist.map(({ name }) => name).join(",");
+              const fullNameNotVr = `source_0_${combinationName}_glossy.mp4`;
+              const linkNotVr = showsConst.find(
+                (show) => show.isVr === false && show.fullName === fullNameNotVr
+              )?.link;
+              if (linkNotVr) {
+                setShowVideo(linkNotVr);
+                setTimeout(() => {
+                  const videoFrame = document.getElementById("videoFrame");
+                  if (videoFrame) {
+                    videoFrame.scrollIntoView({ behavior: "smooth" });
+                  }
+                }, 100);
+              }
+            } catch (e) {
+              console.error("Failed to compute show", e);
+            }
+          })();
+        }}
+      />
       {showVideo && (
         <>
           <Divider my="sm" />
           <Title ta='center' order={2}>Render result (With sound 📢)</Title>
+          <Center>
+            <Group align="flex-end" gap="sm">
+              <Combobox
+                store={combobox}
+                withinPortal={false}
+                onOptionSubmit={(val) => {
+                  if (val === '$create') {
+                    setFoundBy(foundBy);
+                    setUsers((current) => [...current, foundBy]);
+                  } else {
+                    setFoundBy(val);
+                  }
+
+                  combobox.closeDropdown();
+                }}
+              >
+                <Combobox.Target>
+                  <InputBase
+                    label="Found by"
+                    rightSection={<Combobox.Chevron />}
+                    value={foundBy || ''}
+                    onChange={(event) => {
+                      combobox.openDropdown();
+                      combobox.updateSelectedOptionIndex();
+                      setFoundBy(event.currentTarget.value);
+                    }}
+                    onClick={() => combobox.openDropdown()}
+                    onFocus={() => combobox.openDropdown()}
+                    onBlur={() => {
+                      combobox.closeDropdown();
+                      setFoundBy(foundBy || '');
+                    }}
+                    placeholder="Attribute your discovery"
+                    rightSectionPointerEvents="none"
+                  />
+                </Combobox.Target>
+
+                <Combobox.Dropdown>
+                  <Combobox.Options>
+                    {options}
+                    {!exactOptionMatch && foundBy && foundBy.trim().length > 0 && (
+                      <Combobox.Option value="$create">+ Create {foundBy}</Combobox.Option>
+                    )}
+                  </Combobox.Options>
+                </Combobox.Dropdown>
+              </Combobox>
+              <Button
+                disabled={!isNew}
+                onClick={() => {
+                  void (async () => {
+                    try {
+                      await api.post(`/combinations/attribute?${computeAssetQueryParams(playlist)}`, {
+                        userNickname: foundBy,
+                      });
+                    } catch (e) {
+                      console.error("Failed to save combination", e);
+                    }
+                  })();
+                }}
+              >Save</Button>
+            </Group>
+          </Center>
           <Center>
             <div style={{
               width: "100%",

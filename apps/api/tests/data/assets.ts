@@ -2,7 +2,7 @@ import { type Asset } from "@ts-drones/shared";
 import { formatAssetType } from "../../src/helpers/formatters.js";
 
 const assetPayload = {
-    name: "Asset #1",
+    name: "cross",
     video: "https://example.com/video.mp4",
     description: "An example asset",
     type: "2d" as const,

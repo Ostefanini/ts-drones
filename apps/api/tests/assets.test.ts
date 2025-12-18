@@ -6,7 +6,6 @@ import _ from "lodash";
 import { prismaMock } from "./setup/prisma.mock.js";
 import app from "../src/index";
 import { assetPayload, fullAsset, fullAssetFromDb } from "./data/assets.js";
-import { prisma } from '../src/services/prisma.js';
 
 describe('Assets endpoints', () => {
     test('GET /assets responds with 200 and json array', async () => {

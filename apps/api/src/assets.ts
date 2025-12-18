@@ -5,7 +5,6 @@ import {
     assetCreateTextFieldsSchema,
     assetUpdateSchema, AssetListDTO
 } from "@ts-drones/shared";
-import _ from "lodash";
 
 import { thumbnails } from "./services/db.js";
 import {
@@ -104,8 +103,8 @@ if (process.env.NODE_ENV !== "production") {
 
     assetsRouter.delete("/:id",
         validateAssetId,
-        async (_req, res) => {
-            await prisma.asset.delete({ where: { id: _req.params.id } });
+        async (req, res) => {
+            await prisma.asset.delete({ where: { id: req.params.id } });
             res.status(204).end();
         });
 }

@@ -2,7 +2,7 @@ import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 
 export default [
-    { ignores: ["node_modules/**", "dist/**"] },
+    { ignores: ["node_modules/**", "dist/**", "src/generated/**"] },
 
     js.configs.recommended,
 
@@ -28,5 +28,11 @@ export default [
     {
         files: ["./openapi.ts"],
         languageOptions: { parserOptions: { project: null } }
+    },
+    {
+        files: ["tests/**/*.ts"],
+        rules: {
+            "@typescript-eslint/no-explicit-any": "off",
+        },
     }
 ];

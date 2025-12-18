@@ -2,7 +2,7 @@
 import { jest, beforeEach } from '@jest/globals';
 import { mockDeep, mockReset, DeepMockProxy } from 'jest-mock-extended'
 
-import { type PrismaClient, AssetType as AssetTypeGenerated } from '../../src/generated/prisma/client'
+import { type PrismaClient, AssetType as AssetTypeGenerated } from '../../src/generated/prisma/client.js'
 
 jest.unstable_mockModule('../../src/services/prisma.js', () => ({
     __esModule: true,

@@ -88,7 +88,7 @@ function App() {
     <>
       <div style={{ position: 'absolute', top: 20, left: 20, display: 'flex', gap: 10, zIndex: 1000 }}>
         <div
-          onClick={() => i18n.changeLanguage('fr')}
+          onClick={() => void i18n.changeLanguage('fr')}
           style={{
             cursor: 'pointer',
             fontSize: '24px',
@@ -101,7 +101,7 @@ function App() {
           🇫🇷
         </div>
         <div
-          onClick={() => i18n.changeLanguage('en')}
+          onClick={() => void i18n.changeLanguage('en')}
           style={{
             cursor: 'pointer',
             fontSize: '24px',

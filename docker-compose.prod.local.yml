@@ -41,39 +41,7 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
-    command:
-      [
-        "node",
-        "-e",
-        "
-        const net = require('net');
-
-        const host = 'postgres';
-        const port = 5432;
-        const deadline = Date.now() + 30_000;
-
-        const tryConnect = () => new Promise((res, rej) => {
-          const s = net.createConnection({ host, port });
-          s.once('connect', () => { s.end(); res(); });
-          s.once('error', () => rej());
-        });
-
-        (async () => {
-          console.log('waiting for postgres...');
-          while (Date.now() < deadline) {
-            try {
-              await tryConnect();
-              require('./dist/index.js');
-              return;
-            } catch {
-              await new Promise(r => setTimeout(r, 1000));
-            }
-          }
-          console.error('postgres not reachable after 30s');
-          process.exit(1);
-        })();
-        "
-      ]
+    command: ["node", "dist/index.js"]
 
   postgres:
     image: postgres:16
